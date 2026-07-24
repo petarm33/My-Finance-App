@@ -1,0 +1,2117 @@
+<!DOCTYPE html>
+<html lang="en" class="bg-slate-900 text-slate-100">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BiH Wealth & Pillar Management Portal</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        body { font-family: 'Inter', sans-serif; }
+        ::-webkit-scrollbar { width: 8px; height: 8px; }
+        ::-webkit-scrollbar-track { background: #0f172a; }
+        ::-webkit-scrollbar-thumb { background: #334155; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #475569; }
+        .tab-active { border-bottom: 3px solid #3b82f6; color: #60a5fa; font-weight: 600; }
+        .tab-inactive { border-bottom: 3px solid transparent; color: #94a3b8; }
+        .tab-inactive:hover { color: #cbd5e1; border-color: #334155; }
+        button, input, select { touch-action: manipulation; }
+
+        @media (max-width: 767px) {
+            html, body { overflow-x: hidden; }
+            header { position: sticky; }
+            .header-shell {
+                min-height: auto;
+                height: auto !important;
+                flex-wrap: wrap;
+                gap: 0.75rem;
+                padding: 0.75rem 0 0;
+            }
+            .brand-block { min-width: 0; flex: 1; }
+            .brand-copy { min-width: 0; }
+            .brand-title { display: block; font-size: 1rem; line-height: 1.25rem; }
+            .exchange-rate {
+                display: block;
+                width: max-content;
+                margin: 0.2rem 0 0;
+                font-size: 0.58rem;
+            }
+            .reset-button {
+                width: 2.75rem;
+                height: 2.75rem;
+                padding: 0;
+                border-radius: 0.75rem;
+                font-size: 0.875rem;
+            }
+            .reset-button i { margin-right: 0; }
+            .reset-label, .sync-label { display: none; }
+            .primary-tabs {
+                order: 3;
+                display: grid;
+                grid-template-columns: repeat(3, minmax(0, 1fr));
+                flex: 0 0 calc(100% + 2rem);
+                width: calc(100% + 2rem);
+                margin: 0 -1rem;
+                gap: 0;
+                place-items: stretch center;
+                border-top: 1px solid #1e293b;
+                background: rgba(15, 23, 42, 0.96);
+            }
+            .primary-tabs > :not([hidden]) ~ :not([hidden]),
+            .primary-tabs button > :not([hidden]) ~ :not([hidden]),
+            .fund-balance-controls > :not([hidden]) ~ :not([hidden]),
+            .transaction-type-toggle > :not([hidden]) ~ :not([hidden]) { margin-left: 0; }
+            .primary-tabs button,
+            #tab-btn-dashboard,
+            #tab-btn-ledger,
+            #tab-btn-strategy {
+                min-width: 0;
+                min-height: 3.6rem;
+                padding: 0.55rem 0.25rem;
+                justify-content: center;
+                align-items: center;
+                flex-direction: column;
+                gap: 0.2rem;
+                font-size: 0.65rem;
+                line-height: 0.8rem;
+                text-align: center;
+            }
+            .primary-tabs button > span:not(.mobile-tab-label) { display: none; }
+            .primary-tabs .mobile-tab-label { display: block; }
+            .month-filter-badge { display: none !important; }
+            main { padding: 1.25rem 0.75rem 2rem !important; }
+            main .p-6 { padding: 1rem !important; }
+            main .p-5 { padding: 1rem !important; }
+            #tab-dashboard, #tab-ledger, #tab-strategy { --tw-space-y-reverse: 0; }
+            #tab-dashboard > :not([hidden]) ~ :not([hidden]),
+            #tab-ledger > :not([hidden]) ~ :not([hidden]),
+            #tab-strategy > :not([hidden]) ~ :not([hidden]) { margin-top: 1.25rem; }
+            .mobile-stack-heading {
+                align-items: flex-start !important;
+                flex-direction: column;
+                gap: 0.75rem;
+            }
+            .mobile-stack-heading > span { align-self: flex-start; }
+            .fund-balance-row {
+                align-items: flex-start !important;
+                flex-direction: column;
+                gap: 0.75rem;
+            }
+            .fund-balance-controls {
+                display: grid !important;
+                grid-template-columns: 1fr minmax(7rem, 8.5rem) auto;
+                width: 100%;
+                gap: 0.5rem;
+            }
+            .fund-balance-controls input { width: 100% !important; min-height: 2.75rem; }
+            .fund-balance-controls > span:first-child { white-space: nowrap; }
+            .cash-flow-summary {
+                width: 100%;
+                justify-content: space-between;
+                padding: 0.75rem !important;
+            }
+            .cash-flow-summary .text-right { text-align: left; }
+            .cash-flow-summary .text-base { font-size: 0.8rem; }
+            .transaction-type-toggle { display: grid !important; grid-template-columns: repeat(3, 1fr); width: 100%; }
+            .transaction-type-toggle button { min-height: 2.75rem; padding-left: 0.5rem; padding-right: 0.5rem; }
+            input:not([type="range"]):not([type="checkbox"]):not([type="radio"]), select, button { min-height: 2.75rem; }
+            input[type="range"] { min-height: 1.75rem; }
+            .chart-wrap { min-height: 190px !important; }
+            .ledger-table-wrap { overflow: visible; }
+            .ledger-table, .ledger-table tbody { display: block; width: 100%; }
+            .ledger-table thead { display: none; }
+            .ledger-table tbody { border: 0; }
+            .ledger-table tbody tr {
+                display: grid;
+                grid-template-columns: 1fr auto;
+                gap: 0.7rem 1rem;
+                margin-bottom: 0.75rem;
+                padding: 1rem;
+                border: 1px solid #1e293b;
+                border-radius: 0.9rem;
+                background: rgba(2, 6, 23, 0.55);
+            }
+            .ledger-table tbody td {
+                display: block;
+                min-width: 0;
+                padding: 0 !important;
+                text-align: left !important;
+            }
+            .ledger-table tbody td::before {
+                content: attr(data-label);
+                display: block;
+                margin-bottom: 0.2rem;
+                color: #64748b;
+                font-family: 'Inter', sans-serif;
+                font-size: 0.58rem;
+                font-weight: 700;
+                letter-spacing: 0.08em;
+                text-transform: uppercase;
+            }
+            .ledger-table tbody td:nth-child(3),
+            .ledger-table tbody td:nth-child(4),
+            .ledger-table tbody td:nth-child(5) { grid-column: 1 / -1; }
+            .ledger-table tbody td:nth-child(6) { grid-column: 1; }
+            .ledger-table tbody td:nth-child(7) { grid-column: 2; align-self: end; }
+            .ledger-table tbody td:nth-child(7) button { width: 2.75rem; border: 1px solid #334155; border-radius: 0.65rem; }
+            .ledger-table tbody td[colspan] { grid-column: 1 / -1; padding: 1rem 0 !important; text-align: center !important; }
+            .ledger-table tbody td[colspan]::before { display: none; }
+            footer { margin-top: 1rem !important; padding: 1.25rem 1rem !important; line-height: 1.5; }
+        }
+
+        @media (min-width: 768px) {
+            .mobile-tab-label { display: none; }
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col bg-slate-950 text-slate-100">
+
+    <!-- Top Navigation Bar -->
+    <header class="bg-slate-900 border-b border-slate-800 sticky top-0 z-50 shadow-lg">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="header-shell flex items-center justify-between h-16">
+                <div class="brand-block flex items-center space-x-3">
+                    <div class="bg-blue-600 text-white p-2 rounded-lg shadow-md shadow-blue-500/20">
+                        <i class="fa-solid fa-chart-line text-lg"></i>
+                    </div>
+                    <div class="brand-copy">
+                        <span class="brand-title font-bold text-lg tracking-tight bg-gradient-to-r from-white to-slate-400 bg-clip-text text-transparent">BiH Wealth OS</span>
+                        <span class="exchange-rate text-xs bg-blue-900/60 text-blue-300 border border-blue-700/50 px-2 py-0.5 rounded-full ml-2 font-mono">1 EUR = 1.95583 BAM</span>
+                    </div>
+                </div>
+                <nav class="primary-tabs flex space-x-6" aria-label="Primary navigation">
+                    <button onclick="switchTab('dashboard')" id="tab-btn-dashboard" class="py-5 px-3 text-sm transition-all tab-active flex items-center space-x-2">
+                        <i class="fa-solid fa-gauge-high"></i>
+                        <span>Dashboard</span>
+                        <span class="mobile-tab-label">Overview</span>
+                    </button>
+                    <button onclick="switchTab('ledger')" id="tab-btn-ledger" class="py-5 px-3 text-sm transition-all tab-inactive flex items-center space-x-2">
+                        <i class="fa-solid fa-wallet"></i>
+                        <span>Income & Expenses</span>
+                        <span class="mobile-tab-label">Ledger</span>
+                        <span class="month-filter-badge bg-blue-500/20 text-blue-400 text-xs px-1.5 py-0.5 rounded border border-blue-500/30">MONTH FILTER</span>
+                    </button>
+                    <button onclick="switchTab('strategy')" id="tab-btn-strategy" class="py-5 px-3 text-sm transition-all tab-inactive flex items-center space-x-2">
+                        <i class="fa-solid fa-compass"></i>
+                        <span>Strategy & Protocols</span>
+                        <span class="mobile-tab-label">Strategy</span>
+                    </button>
+                </nav>
+                <div class="flex items-center space-x-3">
+                    <button id="device-sync-button" onclick="openDeviceSyncModal()" class="reset-button text-xs bg-emerald-600/20 hover:bg-emerald-600/30 text-emerald-300 hover:text-emerald-200 px-3 py-1.5 rounded-md transition border border-emerald-500/40" aria-label="Automatic device sync is on" title="Automatic device sync is on">
+                        <i id="device-sync-icon" class="fa-solid fa-cloud-arrow-up mr-1"></i> <span id="device-sync-label" class="sync-label">Auto Sync On</span>
+                    </button>
+                    <button onclick="resetToDefaults()" class="reset-button text-xs bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white px-3 py-1.5 rounded-md transition border border-slate-700" aria-label="Reset data">
+                        <i class="fa-solid fa-rotate-right mr-1"></i> <span class="reset-label">Reset Data</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content Container -->
+    <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8">
+
+        <!-- ================================================================= -->
+        <!-- TAB 1: DASHBOARD                                                  -->
+        <!-- ================================================================= -->
+        <div id="tab-dashboard" class="space-y-8 animate-fadeIn">
+            
+            <!-- Quick Net Worth Summary Banner -->
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                <div class="bg-slate-900/90 border border-slate-800 rounded-xl p-5 shadow-sm relative overflow-hidden">
+                    <div class="absolute top-0 right-0 w-24 h-24 bg-blue-500/5 rounded-full blur-xl -mr-6 -mt-6"></div>
+                    <p class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Total Liquid Assets</p>
+                    <h3 class="text-2xl font-bold text-white mt-1 font-mono" id="stat-liquid-assets">2,849.96 BAM</h3>
+                    <p class="text-xs text-slate-400 mt-1 flex items-center">
+                        <span class="text-blue-400 mr-1.5 font-mono" id="stat-liquid-eur">~1,457.16 EUR</span> | Ready Cash & Savings
+                    </p>
+                </div>
+                <div class="bg-slate-900/90 border border-slate-800 rounded-xl p-5 shadow-sm relative overflow-hidden">
+                    <div class="absolute top-0 right-0 w-24 h-24 bg-emerald-500/5 rounded-full blur-xl -mr-6 -mt-6"></div>
+                    <p class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Investment</p>
+                    <h3 class="text-2xl font-bold text-emerald-400 mt-1 font-mono" id="stat-invested">287.51 BAM</h3>
+                    <p class="text-xs text-slate-400 mt-1 flex items-center">
+                        <span class="text-emerald-400/80 mr-1.5 font-mono">147.00 EUR</span> | 0.05% TER Core
+                    </p>
+                </div>
+                <div class="bg-slate-900/90 border border-slate-800 rounded-xl p-5 shadow-sm relative overflow-hidden">
+                    <div class="absolute top-0 right-0 w-24 h-24 bg-rose-500/5 rounded-full blur-xl -mr-6 -mt-6"></div>
+                    <p class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Parental Debt</p>
+                    <h3 class="text-2xl font-bold text-rose-400 mt-1 font-mono" id="stat-debt">-21,171.86 BAM</h3>
+                    <p class="text-xs text-slate-400 mt-1 flex items-center">
+                        <span class="text-rose-400/80 mr-1.5 font-mono">-10,825.00 EUR</span> | 0% Interest Free
+                    </p>
+                </div>
+                
+                <!-- Interactive High-Risk Receivable Tile -->
+                <div class="bg-slate-900/90 border border-amber-500/40 rounded-xl p-5 shadow-sm relative overflow-hidden flex flex-col justify-between">
+                    <div class="absolute top-0 right-0 w-24 h-24 bg-amber-500/5 rounded-full blur-xl -mr-6 -mt-6"></div>
+                    <div>
+                        <div class="flex justify-between items-start">
+                            <p class="text-xs font-semibold text-slate-400 uppercase tracking-wider">High-Risk Receivable</p>
+                            <span id="receivable-badge" class="text-[10px] bg-amber-500/20 text-amber-300 border border-amber-500/30 px-1.5 py-0.5 rounded font-mono">0 BAM Liquid</span>
+                        </div>
+                        <h3 class="text-2xl font-bold text-amber-400 mt-1 font-mono" id="stat-receivable">9,779.15 BAM</h3>
+                        <p class="text-xs text-slate-400 mt-1 flex items-center">
+                            <span class="text-amber-400/80 mr-1.5 font-mono">5,000.00 EUR</span> | Old Employer
+                        </p>
+                    </div>
+                    <button onclick="claimReceivable()" id="btn-claim-rec" class="mt-3 w-full bg-amber-600/30 hover:bg-amber-600/50 text-amber-200 border border-amber-500/40 py-1.5 px-3 rounded-lg text-xs font-semibold transition flex items-center justify-center space-x-1.5">
+                        <i class="fa-solid fa-hand-holding-dollar"></i>
+                        <span>Claim Cleared Funds</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Middle Row: Funds & Assets Chart -->
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                
+                <!-- Left 2 Cols: Funds Section -->
+                <div class="lg:col-span-2 bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-lg space-y-6">
+                    <div class="mobile-stack-heading flex items-center justify-between border-b border-slate-800 pb-4">
+                        <div class="flex items-center space-x-3">
+                            <i class="fa-solid fa-vault text-blue-500 text-xl"></i>
+                            <div>
+                                <h2 class="text-lg font-bold text-white">Funds</h2>
+                                <p class="text-xs text-slate-400">Live operational accounts and invested capital</p>
+                            </div>
+                        </div>
+                        <span class="text-xs bg-slate-800 text-slate-300 px-3 py-1 rounded-full border border-slate-700">Auto-Synced with Ledger</span>
+                    </div>
+
+                    <div class="space-y-5">
+                        <!-- Main Account (Debit) -->
+                        <div class="bg-slate-950/60 p-4 rounded-xl border border-slate-800/80 transition hover:border-slate-700">
+                            <div class="fund-balance-row flex justify-between items-center mb-2">
+                                <span class="text-sm font-semibold text-slate-200 flex items-center">
+                                    <i class="fa-solid fa-building-columns text-blue-400 mr-2.5"></i> Main Debit Account Balance
+                                </span>
+                                <div class="fund-balance-controls flex items-center space-x-2">
+                                    <span class="text-xs text-slate-400 font-mono" id="main-eur-display">~807.16 EUR</span>
+                                    <div class="relative">
+                                        <input type="number" id="input-main-balance" value="1578.67" step="0.01" oninput="updateFundValue('main', this.value)" class="w-28 bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-1 text-right font-mono text-sm font-bold text-blue-400 focus:outline-none focus:border-blue-500">
+                                    </div>
+                                    <span class="text-xs font-bold text-slate-400">BAM</span>
+                                </div>
+                            </div>
+                            <input type="range" id="slider-main-balance" min="0" max="10000" step="10" value="1578.67" oninput="updateFundValue('main', this.value)" class="w-full accent-blue-500 bg-slate-800 h-1.5 rounded-lg cursor-pointer">
+                        </div>
+
+                        <!-- Apartment Fund (Savings) -->
+                        <div class="bg-slate-950/60 p-4 rounded-xl border border-slate-800/80 transition hover:border-slate-700">
+                            <div class="fund-balance-row flex justify-between items-center mb-2">
+                                <span class="text-sm font-semibold text-slate-200 flex items-center">
+                                    <i class="fa-solid fa-house-lock text-purple-400 mr-2.5"></i> Apartment Fund (Štedni račun)
+                                </span>
+                                <div class="fund-balance-controls flex items-center space-x-2">
+                                    <span class="text-xs text-slate-400 font-mono" id="apt-eur-display">500.00 EUR</span>
+                                    <div class="relative">
+                                        <input type="number" id="input-apt-balance" value="977.92" step="0.01" oninput="updateFundValue('apt', this.value)" class="w-28 bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-1 text-right font-mono text-sm font-bold text-purple-400 focus:outline-none focus:border-purple-500">
+                                    </div>
+                                    <span class="text-xs font-bold text-slate-400">BAM</span>
+                                </div>
+                            </div>
+                            <input type="range" id="slider-apt-balance" min="0" max="20000" step="10" value="977.92" oninput="updateFundValue('apt', this.value)" class="w-full accent-purple-500 bg-slate-800 h-1.5 rounded-lg cursor-pointer">
+                        </div>
+
+                        <!-- Wise Account (EUR) -->
+                        <div class="bg-slate-950/60 p-4 rounded-xl border border-slate-800/80 transition hover:border-slate-700">
+                            <div class="fund-balance-row flex justify-between items-center mb-2">
+                                <span class="text-sm font-semibold text-slate-200 flex items-center">
+                                    <i class="fa-solid fa-globe text-cyan-400 mr-2.5"></i> Wise Account (International SEPA)
+                                </span>
+                                <div class="fund-balance-controls flex items-center space-x-2">
+                                    <span class="text-xs text-slate-400 font-mono" id="wise-eur-display">150.00 EUR</span>
+                                    <div class="relative">
+                                        <input type="number" id="input-wise-balance" value="293.37" step="0.01" oninput="updateFundValue('wise', this.value)" class="w-28 bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-1 text-right font-mono text-sm font-bold text-cyan-400 focus:outline-none focus:border-cyan-500">
+                                    </div>
+                                    <span class="text-xs font-bold text-slate-400">BAM</span>
+                                </div>
+                            </div>
+                            <input type="range" id="slider-wise-balance" min="0" max="5000" step="10" value="293.37" oninput="updateFundValue('wise', this.value)" class="w-full accent-cyan-500 bg-slate-800 h-1.5 rounded-lg cursor-pointer">
+                        </div>
+
+                        <!-- Physical Cash -->
+                        <div class="bg-slate-950/60 p-4 rounded-xl border border-slate-800/80 transition hover:border-slate-700">
+                            <div class="fund-balance-row flex justify-between items-center mb-2">
+                                <span class="text-sm font-semibold text-slate-200 flex items-center">
+                                    <i class="fa-solid fa-money-bill-wave text-amber-400 mr-2.5"></i> Physical Cash Balance
+                                </span>
+                                <div class="fund-balance-controls flex items-center space-x-2">
+                                    <span class="text-xs text-slate-400 font-mono" id="cash-eur-display">0.00 EUR</span>
+                                    <div class="relative">
+                                        <input type="number" id="input-cash-balance" value="0.00" step="0.01" oninput="updateFundValue('cash', this.value)" class="w-28 bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-1 text-right font-mono text-sm font-bold text-amber-400 focus:outline-none focus:border-amber-500">
+                                    </div>
+                                    <span class="text-xs font-bold text-slate-400">BAM</span>
+                                </div>
+                            </div>
+                            <input type="range" id="slider-cash-balance" min="0" max="5000" step="10" value="0.00" oninput="updateFundValue('cash', this.value)" class="w-full accent-amber-500 bg-slate-800 h-1.5 rounded-lg cursor-pointer">
+                        </div>
+
+                        <!-- Investment (SC0J) -->
+                        <div class="bg-slate-950/60 p-4 rounded-xl border border-slate-800/80 transition hover:border-slate-700">
+                            <div class="fund-balance-row flex justify-between items-center mb-2">
+                                <span class="text-sm font-semibold text-slate-200 flex items-center">
+                                    <i class="fa-solid fa-arrow-trend-up text-emerald-400 mr-2.5"></i> Investment (MSCI World)
+                                </span>
+                                <div class="fund-balance-controls flex items-center space-x-2">
+                                    <span class="text-xs text-slate-400 font-mono" id="inv-eur-display">147.00 EUR</span>
+                                    <div class="relative">
+                                        <input type="number" id="input-inv-balance" value="287.51" step="0.01" oninput="updateFundValue('inv', this.value)" class="w-28 bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-1 text-right font-mono text-sm font-bold text-emerald-400 focus:outline-none focus:border-emerald-500">
+                                    </div>
+                                    <span class="text-xs font-bold text-slate-400">BAM</span>
+                                </div>
+                            </div>
+                            <input type="range" id="slider-inv-balance" min="0" max="10000" step="10" value="287.51" oninput="updateFundValue('inv', this.value)" class="w-full accent-emerald-500 bg-slate-800 h-1.5 rounded-lg cursor-pointer">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Right Col: Assets Donut Chart -->
+                <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-lg flex flex-col justify-between">
+                    <div>
+                        <h2 class="text-lg font-bold text-white mb-1">Assets Breakdown</h2>
+                        <p class="text-xs text-slate-400 mb-4">Distribution of liquid funds and portfolio capital</p>
+                    </div>
+                    <div class="chart-wrap relative flex-1 flex items-center justify-center min-h-[220px]">
+                        <canvas id="assetsDonutChart"></canvas>
+                        <div class="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
+                            <span class="text-xs text-slate-400 font-medium">Total Assets</span>
+                            <span class="text-lg font-bold text-white font-mono" id="chart-total-assets">3,137.47 BAM</span>
+                        </div>
+                    </div>
+                    <div class="mt-4 pt-4 border-t border-slate-800 grid grid-cols-2 gap-2 text-xs">
+                        <div class="flex items-center"><span class="w-2.5 h-2.5 rounded-full bg-blue-500 mr-2"></span>Main Debit</div>
+                        <div class="flex items-center"><span class="w-2.5 h-2.5 rounded-full bg-purple-500 mr-2"></span>Apartment Fund</div>
+                        <div class="flex items-center"><span class="w-2.5 h-2.5 rounded-full bg-cyan-500 mr-2"></span>Wise (EUR)</div>
+                        <div class="flex items-center"><span class="w-2.5 h-2.5 rounded-full bg-amber-500 mr-2"></span>Physical Cash</div>
+                        <div class="flex items-center"><span class="w-2.5 h-2.5 rounded-full bg-emerald-500 mr-2"></span>ETF</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Budget Allocations & 3 Pillars Framework -->
+            <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-lg space-y-6">
+                <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-800 pb-4">
+                    <div>
+                        <div class="flex items-center space-x-2">
+                            <h2 class="text-lg font-bold text-white flex items-center">
+                                <i class="fa-solid fa-sliders text-blue-500 mr-2.5"></i> Monthly Cash Flow & 3 Pillar Allocation
+                            </h2>
+                            <span class="bg-blue-900/50 border border-blue-700 text-blue-300 text-[11px] px-2 py-0.5 rounded font-mono font-bold" id="stat-savings-rate">Velocity: 58.8%</span>
+                        </div>
+                        <p class="text-xs text-slate-400">Unrestricted sliders — assign your salary surplus across operational living and strategic pillars</p>
+                    </div>
+                    <div class="cash-flow-summary flex items-center space-x-3 bg-slate-950 px-4 py-2 rounded-xl border border-slate-800">
+                        <div class="text-right">
+                            <span class="text-[11px] text-slate-400 block font-medium">Unallocated Pool</span>
+                            <span id="unallocated-badge" class="text-base font-bold font-mono text-emerald-400">0.00 BAM</span>
+                        </div>
+                        <div class="h-8 w-[1px] bg-slate-800"></div>
+                        <div class="text-right">
+                            <span class="text-[11px] text-slate-400 block font-medium">Target Income Pool</span>
+                            <span class="text-base font-bold font-mono text-white">1,700.00 BAM</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="bg-slate-950/50 p-4 rounded-xl border border-slate-800/80">
+                        <div class="flex justify-between items-center mb-2">
+                            <span class="text-sm font-semibold text-slate-300 flex items-center">
+                                <i class="fa-solid fa-cart-shopping text-blue-400 mr-2"></i> Daily Operations & Spend
+                            </span>
+                            <span class="font-mono text-sm font-bold text-blue-400" id="val-alloc-spend">700 BAM</span>
+                        </div>
+                        <input type="range" id="slider-alloc-spend" min="0" max="2500" step="50" value="700" oninput="updateAllocation('spend', this.value)" class="w-full accent-blue-500 bg-slate-800 h-1.5 rounded-lg cursor-pointer">
+                    </div>
+
+                    <div class="bg-slate-950/50 p-4 rounded-xl border border-slate-800/80">
+                        <div class="flex justify-between items-center mb-2">
+                            <span class="text-sm font-semibold text-slate-300 flex items-center">
+                                <i class="fa-solid fa-house text-purple-400 mr-2"></i> Apartment Down Payment
+                            </span>
+                            <span class="font-mono text-sm font-bold text-purple-400" id="val-alloc-apt">600 BAM</span>
+                        </div>
+                        <input type="range" id="slider-alloc-apt" min="0" max="2500" step="50" value="600" oninput="updateAllocation('apt', this.value)" class="w-full accent-purple-500 bg-slate-800 h-1.5 rounded-lg cursor-pointer">
+                    </div>
+
+                    <div class="bg-slate-950/50 p-4 rounded-xl border border-slate-800/80">
+                        <div class="flex justify-between items-center mb-2">
+                            <span class="text-sm font-semibold text-slate-300 flex items-center">
+                                <i class="fa-solid fa-chart-pie text-emerald-400 mr-2"></i> Long-Term ETF
+                            </span>
+                            <span class="font-mono text-sm font-bold text-emerald-400" id="val-alloc-etf">200 BAM</span>
+                        </div>
+                        <input type="range" id="slider-alloc-etf" min="0" max="2500" step="50" value="200" oninput="updateAllocation('etf', this.value)" class="w-full accent-emerald-500 bg-slate-800 h-1.5 rounded-lg cursor-pointer">
+                    </div>
+
+                    <div class="bg-slate-950/50 p-4 rounded-xl border border-slate-800/80">
+                        <div class="flex justify-between items-center mb-2">
+                            <span class="text-sm font-semibold text-slate-300 flex items-center">
+                                <i class="fa-solid fa-handshake text-rose-400 mr-2"></i> Pillar 3: Parental Debt Paydown
+                            </span>
+                            <span class="font-mono text-sm font-bold text-rose-400" id="val-alloc-debt">200 BAM</span>
+                        </div>
+                        <input type="range" id="slider-alloc-debt" min="0" max="2500" step="50" value="200" oninput="updateAllocation('debt', this.value)" class="w-full accent-rose-500 bg-slate-800 h-1.5 rounded-lg cursor-pointer">
+                    </div>
+                </div>
+            </div>
+
+            <!-- 30-Year Wealth Projection Card -->
+            <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-lg space-y-6">
+                <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-800 pb-4">
+                    <div>
+                        <h2 class="text-lg font-bold text-white flex items-center">
+                            <i class="fa-solid fa-rocket text-emerald-400 mr-2.5"></i> 30-Year Compound Growth Engine
+                        </h2>
+                        <p class="text-xs text-slate-400">See how your monthly ETF contributions compound over multi-decade horizons in FBiH (0% Capital Gains Tax)</p>
+                    </div>
+                    <div class="flex items-center space-x-3">
+                        <span class="text-xs text-slate-400">Expected Nominal Return:</span>
+                        <span id="return-rate-val" class="text-sm font-bold font-mono text-emerald-400 bg-emerald-950/80 px-2.5 py-1 rounded border border-emerald-800">8.0%</span>
+                        <input type="range" id="slider-return-rate" min="4" max="12" step="0.5" value="8" oninput="updateProjectionChart(this.value)" class="w-28 accent-emerald-500 bg-slate-800 h-1.5 rounded-lg cursor-pointer">
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
+                    <div class="lg:col-span-3 min-h-[280px]">
+                        <canvas id="projectionChart"></canvas>
+                    </div>
+                    <div class="bg-slate-950/80 p-5 rounded-xl border border-slate-800 flex flex-col justify-between space-y-4">
+                        <div>
+                            <span class="text-xs font-semibold text-slate-400 uppercase tracking-wider block mb-1">In 30 Years You Will Own</span>
+                            <h3 class="text-2xl font-bold text-emerald-400 font-mono" id="proj-final-val">304,821 BAM</h3>
+                            <p class="text-xs text-slate-400 mt-1">Total Portfolio Value</p>
+                        </div>
+                        <div class="space-y-3 border-t border-slate-800/80 pt-3 text-xs">
+                            <div class="flex justify-between">
+                                <span class="text-slate-400">Starting Capital:</span>
+                                <span class="font-mono text-white font-semibold">287.51 BAM</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-slate-400">Total Contributions:</span>
+                                <span class="font-mono text-slate-300 font-semibold" id="proj-contributions">72,287.51 BAM</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-slate-400">Compound Interest:</span>
+                                <span class="font-mono text-emerald-400 font-semibold" id="proj-interest">232,534 BAM</span>
+                            </div>
+                        </div>
+                        <div class="bg-emerald-950/40 border border-emerald-800/50 p-2.5 rounded-lg text-[11px] text-emerald-300/90 leading-relaxed">
+                            <i class="fa-solid fa-shield-halved mr-1"></i> FBiH Tax Benefit: 100% of capital gains are tax-exempt after holding >3 years!
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Monday Accountability & AI Analyst Card -->
+            <div class="bg-gradient-to-br from-slate-900 via-slate-900 to-blue-950/40 border border-blue-500/30 rounded-2xl p-6 shadow-xl relative overflow-hidden">
+                <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
+                    <div class="flex items-center space-x-3">
+                        <div class="bg-blue-600/20 text-blue-400 p-3 rounded-xl border border-blue-500/30">
+                            <i class="fa-solid fa-robot text-xl"></i>
+                        </div>
+                        <div>
+                            <h2 class="text-lg font-bold text-white">AI Financial Analyst & Monday Check-in</h2>
+                            <p class="text-xs text-slate-400">Automated evaluation of your live savings rate, soccer cash flows, and 3-Pillar velocity</p>
+                        </div>
+                    </div>
+                    <button onclick="generateAIInsights()" class="bg-blue-600 hover:bg-blue-500 text-white font-medium text-sm px-5 py-2.5 rounded-xl shadow-lg shadow-blue-600/30 transition flex items-center space-x-2">
+                        <i class="fa-solid fa-wand-magic-sparkles"></i>
+                        <span>Generate Monday Insights</span>
+                    </button>
+                </div>
+
+                <div id="ai-output-box" class="bg-slate-950/80 rounded-xl p-5 border border-slate-800 text-sm text-slate-300 leading-relaxed min-h-[100px] flex items-center justify-center">
+                    <div class="text-center text-slate-500 py-4">
+                        <i class="fa-regular fa-lightbulb text-2xl mb-2 block text-slate-600"></i>
+                        Click "Generate Monday Insights" to analyze your current balances and budget allocations against your 2027 Apartment target!
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- ================================================================= -->
+        <!-- TAB 2: INCOME & EXPENSES (WITH MONTHLY FILTERING)                 -->
+        <!-- ================================================================= -->
+        <div id="tab-ledger" class="space-y-8 hidden animate-fadeIn">
+            
+            <!-- Ledger Overview Stats -->
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                <div class="bg-slate-900 border border-slate-800 rounded-xl p-5 shadow-sm">
+                    <p class="text-xs font-semibold text-slate-400 uppercase" id="ledger-inc-label">Total Income</p>
+                    <h3 class="text-2xl font-bold text-emerald-400 font-mono mt-1" id="ledger-total-income">0.00 BAM</h3>
+                    <p class="text-xs text-slate-500 mt-1">Salary + Soccer + Receivables</p>
+                </div>
+                <div class="bg-slate-900 border border-slate-800 rounded-xl p-5 shadow-sm">
+                    <p class="text-xs font-semibold text-slate-400 uppercase" id="ledger-exp-label">Total Expenses</p>
+                    <h3 class="text-2xl font-bold text-rose-400 font-mono mt-1" id="ledger-total-expense">0.00 BAM</h3>
+                    <p class="text-xs text-slate-500 mt-1">Living + Housing + Debt Payback</p>
+                </div>
+                <div class="bg-slate-900 border border-slate-800 rounded-xl p-5 shadow-sm">
+                    <p class="text-xs font-semibold text-slate-400 uppercase" id="ledger-net-label">Net Cash Flow</p>
+                    <h3 class="text-2xl font-bold text-blue-400 font-mono mt-1" id="ledger-net-flow">0.00 BAM</h3>
+                    <p class="text-xs text-slate-500 mt-1">Available for Pillar Acceleration</p>
+                </div>
+                <div class="bg-slate-900 border border-slate-800 rounded-xl p-5 shadow-sm">
+                    <p class="text-xs font-semibold text-slate-400 uppercase">Physical Cash vs Card</p>
+                    <div class="flex justify-between items-baseline mt-1 font-mono">
+                        <span class="text-sm text-amber-400 font-bold" id="ledger-cash-bal">Cash: 0 BAM</span>
+                        <span class="text-sm text-cyan-400 font-bold" id="ledger-card-bal">Card: 0 BAM</span>
+                    </div>
+                    <p class="text-xs text-slate-500 mt-1">All-time real-time balance split</p>
+                </div>
+            </div>
+
+            <!-- Entry Form & Category Analysis -->
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                
+                <!-- Add Transaction Form -->
+                <div class="lg:col-span-2 bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-lg space-y-6">
+                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-800 pb-4">
+                        <div class="flex items-center space-x-3">
+                            <i class="fa-solid fa-circle-plus text-emerald-500 text-xl"></i>
+                            <div>
+                                <h2 class="text-lg font-bold text-white">Log Transaction</h2>
+                                <p class="text-xs text-slate-400">Record cash, card activity, or internal account transfers.</p>
+                            </div>
+                        </div>
+                        <div class="transaction-type-toggle flex space-x-1 bg-slate-950 p-1 rounded-lg border border-slate-800 text-xs">
+                            <button onclick="setTxType('expense')" id="btn-type-expense" class="px-3 py-1.5 rounded-md font-semibold transition bg-rose-600 text-white shadow">Expense</button>
+                            <button onclick="setTxType('income')" id="btn-type-income" class="px-3 py-1.5 rounded-md font-semibold transition text-slate-400 hover:text-white">Income</button>
+                            <button onclick="setTxType('transfer')" id="btn-type-transfer" class="px-3 py-1.5 rounded-md font-semibold transition text-slate-400 hover:text-white">Transfer</button>
+                        </div>
+                    </div>
+
+                    <form id="tx-form" onsubmit="handleLogTransaction(event)" class="space-y-4">
+                        <input type="hidden" id="tx-type" value="expense">
+                        
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-xs font-medium text-slate-300 mb-1.5" id="label-category">Expense Category</label>
+                                <select id="tx-category" onchange="handleCategoryChange()" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3.5 py-2.5 text-sm text-white focus:outline-none focus:border-blue-500">
+                                </select>
+                            </div>
+
+                            <div>
+                                <label class="block text-xs font-medium text-slate-300 mb-1.5" id="label-method">Payment Method / From Account</label>
+                                <select id="tx-method" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3.5 py-2.5 text-sm text-white focus:outline-none focus:border-blue-500">
+                                    <option value="card-main">Card (Main Debit Account)</option>
+                                    <option value="cash">Physical Cash (Hand / Soccer Cash)</option>
+                                    <option value="card-wise">Wise Account (SEPA / EUR)</option>
+                                    <option value="apt-fund">Apartment Fund (Štedni račun)</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div id="transfer-target-container" class="hidden bg-purple-950/30 border border-purple-800/50 p-3.5 rounded-xl animate-fadeIn">
+                            <label class="block text-xs font-bold text-purple-300 mb-1.5"><i class="fa-solid fa-right-long mr-1"></i> Destination Account (Transfer To)</label>
+                            <select id="tx-target-account" class="w-full bg-slate-950 border border-purple-700/60 rounded-xl px-3.5 py-2.5 text-sm text-white focus:outline-none focus:border-purple-500">
+                                <option value="apt-fund" selected>Apartment Fund (Štedni račun)</option>
+                                <option value="card-main">Main Debit Account</option>
+                                <option value="card-wise">Wise Account (EUR SEPA)</option>
+                                <option value="cash">Physical Cash</option>
+                                <option value="inv">ETF Investment</option>
+                            </select>
+                        </div>
+
+                        <div id="soccer-cash-prompt" class="hidden bg-amber-950/40 border border-amber-600/50 rounded-xl p-4 text-xs space-y-2 animate-fadeIn">
+                            <div class="flex items-center text-amber-300 font-bold text-sm">
+                                <i class="fa-solid fa-soccer-ball mr-2 text-amber-400"></i> Physical Soccer Cash Protocol Triggered
+                            </div>
+                            <p class="text-slate-300">How would you like to direct this physical match income under your Monday accountability rules?</p>
+                            <div class="flex flex-wrap gap-3 pt-1">
+                                <label class="flex items-center space-x-2 bg-amber-900/40 px-3 py-1.5 rounded-lg border border-amber-700/50 cursor-pointer">
+                                    <input type="radio" name="soccer_action" value="deposit_main" checked class="accent-amber-500">
+                                    <span class="text-amber-200">Deposit to Main Bank Account (Electronic 50/30/20)</span>
+                                </label>
+                                <label class="flex items-center space-x-2 bg-amber-900/40 px-3 py-1.5 rounded-lg border border-amber-700/50 cursor-pointer">
+                                    <input type="radio" name="soccer_action" value="keep_cash" class="accent-amber-500">
+                                    <span class="text-amber-200">Keep as Physical Cash (For pocket spend / Debt payback)</span>
+                                </label>
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                            <div class="md:col-span-2">
+                                <label class="block text-xs font-medium text-slate-300 mb-1.5">Amount</label>
+                                <div class="relative flex">
+                                    <input type="number" id="tx-amount" step="0.01" required placeholder="0.00" class="w-full bg-slate-950 border border-slate-800 rounded-l-xl px-3.5 py-2.5 text-base font-mono font-bold text-white focus:outline-none focus:border-blue-500">
+                                    <select id="tx-currency" onchange="updateCurrencyPreview()" class="bg-slate-800 border border-l-0 border-slate-700 rounded-r-xl px-3 text-xs font-bold text-slate-200 focus:outline-none">
+                                        <option value="BAM">BAM (KM)</option>
+                                        <option value="EUR">EUR (€)</option>
+                                    </select>
+                                </div>
+                                <span id="tx-conv-preview" class="text-[11px] text-slate-500 font-mono mt-1 block"></span>
+                            </div>
+
+                            <div>
+                                <label class="block text-xs font-medium text-slate-300 mb-1.5">Date</label>
+                                <input type="date" id="tx-date" required class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2.5 text-sm text-slate-200 focus:outline-none focus:border-blue-500">
+                            </div>
+                        </div>
+
+                        <div>
+                            <label class="block text-xs font-medium text-slate-300 mb-1.5">Description / Notes (Optional)</label>
+                            <input type="text" id="tx-notes" placeholder="e.g., Monthly savings move to Štedni račun, weekly groceries..." class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3.5 py-2 text-sm text-slate-200 focus:outline-none focus:border-blue-500">
+                        </div>
+
+                        <div class="pt-2">
+                            <button type="submit" id="btn-submit-main" class="w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-semibold py-3 px-4 rounded-xl shadow-lg shadow-blue-500/20 transition flex items-center justify-center space-x-2">
+                                <i class="fa-solid fa-check-circle"></i>
+                                <span id="btn-submit-text">Log Expense Transaction</span>
+                            </button>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- Right Col: Expense Breakdown by Category -->
+                <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-lg flex flex-col justify-between">
+                    <div>
+                        <h2 class="text-lg font-bold text-white mb-1">Expense Breakdown</h2>
+                        <p class="text-xs text-slate-400 mb-4" id="breakdown-subtitle">Where your money goes (Selected Period)</p>
+                        
+                        <div id="category-progress-container" class="space-y-4 max-h-[350px] overflow-y-auto pr-1">
+                        </div>
+                    </div>
+                    <div class="mt-6 pt-4 border-t border-slate-800 bg-slate-950/60 p-3 rounded-xl">
+                        <div class="flex justify-between items-center text-xs">
+                            <span class="text-slate-400 font-medium">Top Spending Category:</span>
+                            <span class="text-white font-bold" id="top-spend-cat">None yet</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Transaction History Table -->
+            <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-lg space-y-4">
+                <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4 border-b border-slate-800 pb-4">
+                    <div>
+                        <h2 class="text-lg font-bold text-white">Ledger History</h2>
+                        <p class="text-xs text-slate-400">All recorded cash, card, and internal transfer transactions</p>
+                    </div>
+                    <div class="flex flex-col sm:flex-row items-start sm:items-center gap-3">
+                        <!-- TIME PERIOD SELECTOR -->
+                        <div class="flex items-center space-x-2">
+                            <span class="text-xs text-slate-400 font-semibold"><i class="fa-regular fa-calendar mr-1"></i> Period:</span>
+                            <select id="month-filter" onchange="changeMonthFilter(this.value)" class="bg-slate-950 border border-blue-500/50 rounded-lg px-3 py-1.5 text-xs font-bold text-blue-300 focus:outline-none focus:border-blue-400 shadow-sm shadow-blue-900/20">
+                                <!-- Populated by JS -->
+                            </select>
+                        </div>
+                        
+                        <div class="h-6 w-px bg-slate-800 hidden sm:block"></div>
+                        
+                        <div class="flex flex-wrap gap-2">
+                            <button onclick="filterTransactions('all')" id="flt-all" class="px-3 py-1 rounded-lg text-xs font-semibold bg-blue-600 text-white">All</button>
+                            <button onclick="filterTransactions('income')" id="flt-income" class="px-3 py-1 rounded-lg text-xs font-semibold bg-slate-800 text-slate-300 hover:bg-slate-700">Incomes</button>
+                            <button onclick="filterTransactions('expense')" id="flt-expense" class="px-3 py-1 rounded-lg text-xs font-semibold bg-slate-800 text-slate-300 hover:bg-slate-700">Expenses</button>
+                            <button onclick="filterTransactions('transfer')" id="flt-transfer" class="px-3 py-1 rounded-lg text-xs font-semibold bg-slate-800 text-slate-300 hover:bg-slate-700">Transfers</button>
+                            <button onclick="filterTransactions('cash')" id="flt-cash" class="px-3 py-1 rounded-lg text-xs font-semibold bg-slate-800 text-slate-300 hover:bg-slate-700">Cash</button>
+                            <button onclick="filterTransactions('card')" id="flt-card" class="px-3 py-1 rounded-lg text-xs font-semibold bg-slate-800 text-slate-300 hover:bg-slate-700">Card</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="ledger-table-wrap overflow-x-auto">
+                    <table class="ledger-table w-full text-left border-collapse">
+                        <thead>
+                            <tr class="border-b border-slate-800 text-[11px] text-slate-400 uppercase tracking-wider">
+                                <th class="py-3 px-4">Date</th>
+                                <th class="py-3 px-4">Type</th>
+                                <th class="py-3 px-4">Category / Purpose</th>
+                                <th class="py-3 px-4">From / To Method</th>
+                                <th class="py-3 px-4">Description</th>
+                                <th class="py-3 px-4 text-right">Amount (BAM)</th>
+                                <th class="py-3 px-4 text-center">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tx-table-body" class="divide-y divide-slate-800/60 text-sm font-medium text-slate-300">
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- TAB 3: STRATEGY & PROTOCOLS -->
+        <div id="tab-strategy" class="space-y-8 hidden animate-fadeIn">
+            
+            <div class="bg-gradient-to-r from-blue-900/40 via-slate-900 to-slate-900 border border-blue-500/30 rounded-2xl p-6 shadow-lg">
+                <h2 class="text-xl font-bold text-white mb-2 flex items-center">
+                    <i class="fa-solid fa-flag-checkered text-blue-400 mr-3"></i> Master 3-Pillar Execution Plan (BiH / FBiH Context)
+                </h2>
+                <p class="text-sm text-slate-300 leading-relaxed">
+                    This strategic roadmap aligns your operational bank accounts, currency pegs, and legal tax advantages in Bosnia and Herzegovina to achieve financial independence while honoring your family obligations.
+                </p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-lg space-y-4">
+                    <div class="flex items-center space-x-3">
+                        <div class="bg-purple-500/20 text-purple-400 p-3 rounded-xl border border-purple-500/30">
+                            <i class="fa-solid fa-house-chimney text-xl"></i>
+                        </div>
+                        <div>
+                            <span class="text-xs font-bold text-purple-400 uppercase tracking-wider">Pillar 1 Target</span>
+                            <h3 class="text-lg font-bold text-white">Apartment Purchase</h3>
+                        </div>
+                    </div>
+                    <div class="text-xs text-slate-400 space-y-2 border-t border-slate-800 pt-3 leading-relaxed">
+                        <p><strong class="text-white">Timeline:</strong> Late 2027 / Early 2028 (~36-42 months horizon).</p>
+                        <p><strong class="text-white">Vehicle:</strong> Dedicated savings account (<em class="text-purple-300">Štedni račun</em>) or short-term EUR term deposits.</p>
+                        <p><strong class="text-white">Currency Peg Advantage:</strong> Because 1 EUR = 1.95583 BAM is fixed by the Central Bank currency board, holding savings in BAM or EUR carries identical exchange risk.</p>
+                    </div>
+                </div>
+
+                <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-lg space-y-4">
+                    <div class="flex items-center space-x-3">
+                        <div class="bg-emerald-500/20 text-emerald-400 p-3 rounded-xl border border-emerald-500/30">
+                            <i class="fa-solid fa-earth-europe text-xl"></i>
+                        </div>
+                        <div>
+                            <span class="text-xs font-bold text-emerald-400 uppercase tracking-wider">Pillar 2 Core</span>
+                            <h3 class="text-lg font-bold text-white">Invesco MSCI World</h3>
+                        </div>
+                    </div>
+                    <div class="text-xs text-slate-400 space-y-2 border-t border-slate-800 pt-3 leading-relaxed">
+                        <p><strong class="text-white">Cost Champion:</strong> At just <strong class="text-emerald-400">0.05% TER</strong>, SC0J tracks ~1,500 developed world giants.</p>
+                        <p><strong class="text-white">FBiH Tax Shield:</strong> Accumulating dividends bypass FBiH's 10% dividend tax and PIP-1033 filings entirely.</p>
+                        <p><strong class="text-white">0% Capital Gains Tax:</strong> In FBiH, capital gains on securities held for personal long-term investment are tax-exempt!</p>
+                    </div>
+                </div>
+
+                <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-lg space-y-4">
+                    <div class="flex items-center space-x-3">
+                        <div class="bg-rose-500/20 text-rose-400 p-3 rounded-xl border border-rose-500/30">
+                            <i class="fa-solid fa-users text-xl"></i>
+                        </div>
+                        <div>
+                            <span class="text-xs font-bold text-rose-400 uppercase tracking-wider">Pillar 3 Strategy</span>
+                            <h3 class="text-lg font-bold text-white">Parental Debt Paydown</h3>
+                        </div>
+                    </div>
+                    <div class="text-xs text-slate-400 space-y-2 border-t border-slate-800 pt-3 leading-relaxed">
+                        <p><strong class="text-white">Total Liability:</strong> 10,825.00 EUR (21,171.86 BAM) interest-free family loan.</p>
+                        <p><strong class="text-white">Payback Strategy:</strong> Allocate a steady monthly tranche (~200 BAM) plus 50% of any sporadic soccer match cash bonuses directly to parental payback.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Monday Accountability Checklist -->
+            <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-lg space-y-4">
+                <h3 class="text-lg font-bold text-white flex items-center">
+                    <i class="fa-solid fa-calendar-check text-blue-400 mr-2.5"></i> The Monday Accountability Protocol (Checklist)
+                </h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-slate-300">
+                    <div class="bg-slate-950 p-4 rounded-xl border border-slate-800 flex items-start space-x-3">
+                        <input type="checkbox" checked class="mt-1 accent-blue-500 w-4 h-4">
+                        <div>
+                            <strong class="text-white block">1. Balance Verification</strong>
+                            <span class="text-xs text-slate-400">Check and update live balances across Main Account, Apartment Fund, Wise, and ETF investment.</span>
+                        </div>
+                    </div>
+                    <div class="bg-slate-950 p-4 rounded-xl border border-slate-800 flex items-start space-x-3">
+                        <input type="checkbox" checked class="mt-1 accent-blue-500 w-4 h-4">
+                        <div>
+                            <strong class="text-white block">2. Log Soccer Income & Internal Transfers</strong>
+                            <span class="text-xs text-slate-400">Record physical match earnings or internal transfers from Debit to Štedni račun in the Ledger.</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+    </main>
+
+    <div id="device-sync-modal" class="hidden fixed inset-0 z-[100] overflow-y-auto overscroll-contain bg-slate-950/80 backdrop-blur-sm p-4" role="dialog" aria-modal="true" aria-labelledby="device-sync-title" onclick="closeDeviceSyncModal()">
+        <div class="min-h-full flex items-center justify-center py-2 sm:py-6">
+            <div class="w-full max-w-lg bg-slate-900 border border-slate-700 rounded-2xl shadow-2xl p-5 sm:p-6" onclick="event.stopPropagation()">
+                <div class="flex items-start justify-between gap-4">
+                    <div class="flex items-start gap-3">
+                        <div class="bg-blue-600/20 text-blue-300 border border-blue-500/30 rounded-xl p-3">
+                            <i class="fa-solid fa-arrows-rotate"></i>
+                        </div>
+                        <div>
+                            <h2 id="device-sync-title" class="text-lg font-bold text-white">Automatic Device Sync</h2>
+                            <p class="text-xs text-slate-400 mt-1">Connect once, then changes sync automatically on your desktop and phone.</p>
+                        </div>
+                    </div>
+                    <button onclick="closeDeviceSyncModal()" class="text-slate-400 hover:text-white p-2 -mr-2 -mt-2" aria-label="Close device sync">
+                        <i class="fa-solid fa-xmark text-lg"></i>
+                    </button>
+                </div>
+
+                <div class="mt-6 space-y-5">
+                    <section class="bg-slate-950/70 border border-slate-800 rounded-xl p-4">
+                        <div class="mb-4 flex items-center gap-2 rounded-lg border border-emerald-500/30 bg-emerald-500/10 px-3 py-2 text-xs text-emerald-200">
+                            <i class="fa-solid fa-circle-check"></i>
+                            <span>Automatic sync stays active after this one-time setup.</span>
+                        </div>
+                        <p class="text-xs font-semibold uppercase tracking-wider text-slate-400">This device's sync code</p>
+                        <div class="mt-2 flex gap-2">
+                            <input id="current-sync-code" type="text" readonly class="min-w-0 flex-1 bg-slate-950 border border-slate-700 rounded-lg px-3 py-2.5 text-xs text-blue-300 font-mono focus:outline-none" aria-label="Current sync code">
+                            <button onclick="copySyncCode()" class="shrink-0 bg-blue-600 hover:bg-blue-500 text-white px-4 py-2.5 rounded-lg text-xs font-semibold transition">
+                                <i class="fa-regular fa-copy mr-1"></i> Copy
+                            </button>
+                        </div>
+                        <p class="text-[11px] text-amber-300/90 mt-2"><i class="fa-solid fa-lock mr-1"></i>Keep this code private. Anyone with it can access this dashboard data.</p>
+                    </section>
+
+                    <form id="device-sync-form" onsubmit="requestDeviceConnection(event)">
+                        <label for="link-sync-code" class="text-xs font-semibold uppercase tracking-wider text-slate-400">Connect this device to another one</label>
+                        <textarea id="link-sync-code" rows="3" spellcheck="false" autocomplete="off" placeholder="Paste the sync code from your other device" class="mt-2 w-full resize-none bg-slate-950 border border-slate-700 rounded-lg px-3 py-3 text-sm text-white font-mono placeholder:text-slate-600 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500"></textarea>
+                        <p id="device-sync-status" class="hidden mt-3 text-xs rounded-lg border px-3 py-2" role="status" aria-live="polite"></p>
+                        <div id="device-sync-confirmation" class="hidden mt-3 rounded-xl border border-amber-500/30 bg-amber-500/10 p-3" role="alert">
+                            <p class="text-xs leading-relaxed text-amber-100">This replaces the dashboard data on this device once. After connecting, all future changes sync automatically in both directions.</p>
+                            <div class="mt-3 grid grid-cols-2 gap-2">
+                                <button type="button" onclick="cancelDeviceConnection()" class="border border-slate-600 bg-slate-800 text-slate-200 px-3 py-2.5 rounded-lg text-xs font-semibold transition hover:bg-slate-700">Cancel</button>
+                                <button id="confirm-device-button" type="button" onclick="connectToSyncCode()" class="bg-amber-500 text-slate-950 px-3 py-2.5 rounded-lg text-xs font-bold transition hover:bg-amber-400 disabled:bg-slate-700 disabled:text-slate-400">Replace &amp; Load</button>
+                            </div>
+                        </div>
+                        <button id="connect-device-button" type="submit" class="mt-3 w-full bg-emerald-600 hover:bg-emerald-500 disabled:bg-slate-700 disabled:text-slate-400 text-white px-4 py-3 rounded-lg text-sm font-semibold transition">
+                            <i class="fa-solid fa-link mr-1.5"></i> Connect Once & Enable Auto Sync
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="bg-slate-900 border-t border-slate-800 py-6 mt-12 text-center text-xs text-slate-500">
+        <p>BiH Personal Wealth Management Portal &bull; Fixed Peg: 1 EUR = 1.95583 BAM &bull; Designed for FBiH Tax & Financial Compliance</p>
+    </footer>
+
+    <!-- JAVASCRIPT ENGINE & STATE MANAGEMENT -->
+    <script>
+        const EUR_TO_BAM = 1.95583;
+        const STORAGE_KEY = "bih_wealth_os_v4";
+        const SYNC_ID_KEY = `${STORAGE_KEY}_sync_id`;
+        const STATE_API_URL = "/api/user-state";
+        const ACTIVE_SYNC_INTERVAL_MS = 3_000;
+        const SYNC_RETRY_DELAY_MS = 3_000;
+
+        const EXPENSE_CATEGORIES = [
+            "Groceries & Supermarket",
+            "Utilities & Housing Bills",
+            "Dining Out & Coffee",
+            "Transport & Fuel",
+            "Soccer Gear & Match Expenses",
+            "Parental Debt Repayment",
+            "Healthcare & Pharmacy",
+            "Shopping & Clothing",
+            "Entertainment & Subscriptions",
+            "Miscellaneous"
+        ];
+
+        const INCOME_CATEGORIES = [
+            "Monthly Salary",
+            "Soccer Match Earnings (Cash/Bonus)",
+            "Former Employer Receivable Payoff",
+            "Gift / Family Support",
+            "Other Income"
+        ];
+
+        const TRANSFER_CATEGORIES = [
+            "Move to Apartment Fund (Štedni račun)",
+            "Move to ETF Broker",
+            "Transfer to Wise Account (EUR SEPA)",
+            "Cash Withdrawal to Physical Cash",
+            "General Internal Account Transfer"
+        ];
+
+        const ACCOUNT_NAMES = {
+            "card-main": "Main Debit Account",
+            "apt-fund": "Apartment Fund (Štedni račun)",
+            "card-wise": "Wise Account (EUR)",
+            "cash": "Physical Cash",
+            "inv": "ETF Investment"
+        };
+
+        function getCurrentMonthStr() {
+            const d = new Date();
+            const y = d.getFullYear();
+            const m = String(d.getMonth() + 1).padStart(2, '0');
+            return `${y}-${m}`;
+        }
+
+        const DEFAULT_STATE = {
+            funds: {
+                main: 1578.67,
+                apt: 977.92,
+                wise: 293.37,
+                cash: 0.00,
+                inv: 287.51
+            },
+            allocations: {
+                spend: 700,
+                apt: 600,
+                etf: 200,
+                debt: 200
+            },
+            debtLiab: -21171.86,
+            receivable: 9779.15,
+            expectedReturn: 8.0,
+            selectedMonth: getCurrentMonthStr(),
+            transactions: [
+                { id: 1, date: "2026-07-20", type: "income", category: "Monthly Salary", method: "card-main", targetAccount: "", amount: 1700.00, notes: "July Base Salary" },
+                { id: 2, date: "2026-07-18", type: "income", category: "Soccer Match Earnings (Cash/Bonus)", method: "cash", targetAccount: "", amount: 150.00, notes: "Weekend tournament cash win" },
+                { id: 3, date: "2026-07-21", type: "transfer", category: "Move to Apartment Fund (Štedni račun)", method: "card-main", targetAccount: "apt-fund", amount: 600.00, notes: "Monthly savings transfer Debit -> Štedni račun" },
+                { id: 4, date: "2026-07-19", type: "expense", category: "Groceries & Supermarket", method: "card-main", targetAccount: "", amount: 145.50, notes: "Weekly stock up at Bingo" },
+                { id: 5, date: "2026-07-15", type: "expense", category: "Parental Debt Repayment", method: "cash", targetAccount: "", amount: 200.00, notes: "Monthly family loan tranche" }
+            ],
+            currentFilter: "all"
+        };
+
+        function normalizeState(candidate) {
+            const source = candidate && typeof candidate === "object" ? candidate : {};
+            return {
+                ...JSON.parse(JSON.stringify(DEFAULT_STATE)),
+                ...source,
+                funds: { ...DEFAULT_STATE.funds, ...(source.funds || {}) },
+                allocations: { ...DEFAULT_STATE.allocations, ...(source.allocations || {}) },
+                selectedMonth: source.selectedMonth || getCurrentMonthStr(),
+                transactions: Array.isArray(source.transactions) ? source.transactions : DEFAULT_STATE.transactions,
+                currentFilter: source.currentFilter || "all"
+            };
+        }
+
+        function cloneState(state) {
+            return normalizeState(JSON.parse(JSON.stringify(state)));
+        }
+
+        function valuesMatch(left, right) {
+            return JSON.stringify(left) === JSON.stringify(right);
+        }
+
+        function mergeConcurrentState(baseCandidate, remoteCandidate, localCandidate) {
+            const base = cloneState(baseCandidate || remoteCandidate);
+            const remote = cloneState(remoteCandidate);
+            const local = cloneState(localCandidate);
+            const merged = { ...remote };
+
+            merged.funds = { ...remote.funds };
+            Object.keys(DEFAULT_STATE.funds).forEach(key => {
+                const baseValue = Number(base.funds[key]) || 0;
+                const remoteValue = Number(remote.funds[key]) || 0;
+                const localValue = Number(local.funds[key]) || 0;
+                merged.funds[key] = remoteValue + (localValue - baseValue);
+            });
+
+            merged.allocations = { ...remote.allocations };
+            Object.keys(DEFAULT_STATE.allocations).forEach(key => {
+                if (!valuesMatch(local.allocations[key], base.allocations[key])) {
+                    merged.allocations[key] = local.allocations[key];
+                }
+            });
+
+            merged.debtLiab = (Number(remote.debtLiab) || 0) + ((Number(local.debtLiab) || 0) - (Number(base.debtLiab) || 0));
+
+            ["selectedMonth", "currentFilter"].forEach(key => {
+                if (!valuesMatch(local[key], base[key])) merged[key] = local[key];
+            });
+
+            const baseTransactions = new Map(base.transactions.map(transaction => [String(transaction.id), transaction]));
+            const localTransactions = new Map(local.transactions.map(transaction => [String(transaction.id), transaction]));
+            const mergedTransactions = new Map(remote.transactions.map(transaction => [String(transaction.id), transaction]));
+
+            baseTransactions.forEach((baseTransaction, id) => {
+                if (!localTransactions.has(id)) {
+                    mergedTransactions.delete(id);
+                } else if (!valuesMatch(localTransactions.get(id), baseTransaction)) {
+                    mergedTransactions.set(id, localTransactions.get(id));
+                }
+            });
+            localTransactions.forEach((transaction, id) => {
+                if (!baseTransactions.has(id)) mergedTransactions.set(id, transaction);
+            });
+
+            merged.transactions = Array.from(mergedTransactions.values()).sort((left, right) => Number(right.id) - Number(left.id));
+            return normalizeState(merged);
+        }
+
+        function loadLocalState() {
+            try {
+                const storedState = localStorage.getItem(STORAGE_KEY);
+                return normalizeState(storedState ? JSON.parse(storedState) : DEFAULT_STATE);
+            } catch {
+                return normalizeState(DEFAULT_STATE);
+            }
+        }
+
+        function getSyncId() {
+            const storedId = localStorage.getItem(SYNC_ID_KEY);
+            if (/^[a-f0-9]{64}$/.test(storedId || "")) return storedId;
+
+            const bytes = crypto.getRandomValues(new Uint8Array(32));
+            const syncId = Array.from(bytes, byte => byte.toString(16).padStart(2, "0")).join("");
+            localStorage.setItem(SYNC_ID_KEY, syncId);
+            return syncId;
+        }
+
+        let appState = loadLocalState();
+        let syncId = getSyncId();
+        let localStateRevision = 0;
+        let syncTimer = null;
+        let hasPendingStateSync = false;
+        let isHydratingState = false;
+        let isPushingState = false;
+        let pendingSyncId = null;
+        let lastRemoteUpdatedAt = null;
+        let lastRemoteRevision = null;
+        let lastSyncedState = null;
+
+        let assetsDonutChart = null;
+        let projectionChart = null;
+
+        document.addEventListener("DOMContentLoaded", async () => {
+            document.getElementById("tx-date").valueAsDate = new Date();
+            populateCategories();
+            syncDOMWithState();
+            initCharts();
+            updateAllCalculations();
+            renderLedger();
+            await hydrateStateFromApi();
+        });
+
+        window.addEventListener("online", () => {
+            updateDeviceSyncIndicator("syncing");
+            if (hasPendingStateSync) scheduleStateSync();
+            else hydrateStateFromApi();
+        });
+        window.addEventListener("focus", hydrateStateFromApi);
+        window.addEventListener("pageshow", hydrateStateFromApi);
+        document.addEventListener("visibilitychange", () => {
+            if (document.hidden) {
+                if (hasPendingStateSync) pushStateToApi({ keepalive: true });
+            } else {
+                hydrateStateFromApi();
+            }
+        });
+        window.addEventListener("pagehide", () => {
+            if (hasPendingStateSync) pushStateToApi({ keepalive: true });
+        });
+        window.addEventListener("storage", event => {
+            if (event.key !== STORAGE_KEY || !event.newValue || hasPendingStateSync) return;
+
+            try {
+                appState = normalizeState(JSON.parse(event.newValue));
+                renderState();
+            } catch {}
+        });
+        window.setInterval(() => {
+            if (!document.hidden && navigator.onLine) hydrateStateFromApi();
+        }, ACTIVE_SYNC_INTERVAL_MS);
+        window.addEventListener("keydown", event => {
+            if (event.key === "Escape") closeDeviceSyncModal();
+        });
+
+        function openDeviceSyncModal() {
+            document.getElementById("current-sync-code").value = syncId;
+            document.getElementById("link-sync-code").value = "";
+            cancelDeviceConnection();
+            setDeviceSyncStatus("", "idle");
+            document.getElementById("device-sync-modal").classList.remove("hidden");
+            document.body.classList.add("overflow-hidden");
+        }
+
+        function closeDeviceSyncModal() {
+            document.getElementById("device-sync-modal").classList.add("hidden");
+            document.body.classList.remove("overflow-hidden");
+            cancelDeviceConnection();
+        }
+
+        function setDeviceSyncStatus(message, type) {
+            const status = document.getElementById("device-sync-status");
+            status.textContent = message;
+            status.className = "mt-3 text-xs rounded-lg border px-3 py-2";
+
+            if (!message || type === "idle") {
+                status.classList.add("hidden");
+            } else if (type === "success") {
+                status.classList.add("text-emerald-300", "bg-emerald-500/10", "border-emerald-500/30");
+            } else {
+                status.classList.add("text-rose-300", "bg-rose-500/10", "border-rose-500/30");
+            }
+        }
+
+        function updateDeviceSyncIndicator(status) {
+            const button = document.getElementById("device-sync-button");
+            const icon = document.getElementById("device-sync-icon");
+            const label = document.getElementById("device-sync-label");
+            if (!button || !icon || !label) return;
+
+            button.className = "reset-button text-xs px-3 py-1.5 rounded-md transition border";
+            icon.className = "fa-solid mr-1";
+
+            if (!navigator.onLine || status === "offline") {
+                button.classList.add("bg-amber-600/20", "hover:bg-amber-600/30", "text-amber-300", "border-amber-500/40");
+                icon.classList.add("fa-cloud-arrow-up");
+                label.textContent = "Sync Paused";
+                button.setAttribute("aria-label", "Automatic device sync is waiting for a connection");
+                button.title = "Offline changes sync automatically when the connection returns";
+            } else if (status === "syncing") {
+                button.classList.add("bg-blue-600/20", "hover:bg-blue-600/30", "text-blue-300", "border-blue-500/40");
+                icon.classList.add("fa-arrows-rotate", "fa-spin");
+                label.textContent = "Syncing";
+                button.setAttribute("aria-label", "Automatic device sync is working");
+                button.title = "Syncing changes automatically";
+            } else {
+                button.classList.add("bg-emerald-600/20", "hover:bg-emerald-600/30", "text-emerald-300", "border-emerald-500/40");
+                icon.classList.add("fa-cloud-arrow-up");
+                label.textContent = "Auto Sync On";
+                button.setAttribute("aria-label", "Automatic device sync is on");
+                button.title = "Changes sync automatically across connected devices";
+            }
+        }
+
+        function renderState() {
+            syncDOMWithState();
+            updateAllCalculations();
+            renderLedger();
+        }
+
+        function showDeviceSyncStatus(message, type) {
+            setDeviceSyncStatus(message, type);
+            document.getElementById("device-sync-status").scrollIntoView({ block: "nearest", behavior: "smooth" });
+        }
+
+        async function copySyncCode() {
+            const codeInput = document.getElementById("current-sync-code");
+
+            try {
+                await navigator.clipboard.writeText(syncId);
+            } catch {
+                codeInput.select();
+                document.execCommand("copy");
+                window.getSelection()?.removeAllRanges();
+            }
+
+            setDeviceSyncStatus("Sync code copied. Paste it on your other device.", "success");
+        }
+
+        function requestDeviceConnection(event) {
+            event.preventDefault();
+            const codeInput = document.getElementById("link-sync-code");
+            const candidateSyncId = codeInput.value.trim().toLowerCase().replace(/[\s-]+/g, "");
+            codeInput.blur();
+
+            if (!/^[a-f0-9]{64}$/.test(candidateSyncId)) {
+                showDeviceSyncStatus("Paste the complete 64-character sync code.", "error");
+                return;
+            }
+
+            if (candidateSyncId === syncId) {
+                showDeviceSyncStatus("This device is already using that sync code.", "success");
+                return;
+            }
+
+            pendingSyncId = candidateSyncId;
+            setDeviceSyncStatus("", "idle");
+            document.getElementById("connect-device-button").classList.add("hidden");
+            const confirmation = document.getElementById("device-sync-confirmation");
+            confirmation.classList.remove("hidden");
+            confirmation.scrollIntoView({ block: "nearest", behavior: "smooth" });
+        }
+
+        function cancelDeviceConnection() {
+            pendingSyncId = null;
+            document.getElementById("device-sync-confirmation").classList.add("hidden");
+            document.getElementById("connect-device-button").classList.remove("hidden");
+        }
+
+        async function connectToSyncCode() {
+            if (!pendingSyncId) return;
+
+            const candidateSyncId = pendingSyncId;
+            const codeInput = document.getElementById("link-sync-code");
+            const confirmButton = document.getElementById("confirm-device-button");
+
+            confirmButton.disabled = true;
+            confirmButton.innerHTML = '<i class="fa-solid fa-spinner fa-spin mr-1.5"></i> Connecting...';
+            setDeviceSyncStatus("", "idle");
+
+            try {
+                const response = await fetch(STATE_API_URL, {
+                    headers: { "X-Sync-ID": candidateSyncId },
+                    cache: "no-store"
+                });
+
+                if (response.status === 204) {
+                    setDeviceSyncStatus("No saved data was found for that code. Open the other device, make a change, and try again.", "error");
+                    return;
+                }
+
+                if (!response.ok) throw new Error("Device connection failed");
+
+                const remoteRecord = await response.json();
+                window.clearTimeout(syncTimer);
+                syncId = candidateSyncId;
+                localStorage.setItem(SYNC_ID_KEY, syncId);
+                appState = normalizeState(remoteRecord.state);
+                localStateRevision += 1;
+                hasPendingStateSync = false;
+                lastRemoteUpdatedAt = remoteRecord.updatedAt || null;
+                lastRemoteRevision = remoteRecord.revision;
+                lastSyncedState = cloneState(appState);
+                localStorage.setItem(STORAGE_KEY, JSON.stringify(appState));
+                document.getElementById("current-sync-code").value = syncId;
+                codeInput.value = "";
+                cancelDeviceConnection();
+                renderState();
+                updateDeviceSyncIndicator("synced");
+                showDeviceSyncStatus("Connected. Future changes now sync automatically on both devices.", "success");
+            } catch {
+                showDeviceSyncStatus("Unable to connect right now. Check your connection and try again.", "error");
+            } finally {
+                confirmButton.disabled = false;
+                confirmButton.innerHTML = 'Replace &amp; Load';
+            }
+        }
+
+        function saveState() {
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(appState));
+            localStateRevision += 1;
+            hasPendingStateSync = true;
+            updateDeviceSyncIndicator(navigator.onLine ? "syncing" : "offline");
+            scheduleStateSync();
+        }
+
+        function scheduleStateSync() {
+            window.clearTimeout(syncTimer);
+            syncTimer = window.setTimeout(pushStateToApi, 350);
+        }
+
+        async function pushStateToApi(options = {}) {
+            if (isPushingState || !hasPendingStateSync || !navigator.onLine) {
+                if (!navigator.onLine) updateDeviceSyncIndicator("offline");
+                return;
+            }
+
+            const stateSnapshot = JSON.parse(JSON.stringify(appState));
+            const revisionAtRequest = localStateRevision;
+            isPushingState = true;
+            updateDeviceSyncIndicator("syncing");
+
+            try {
+                const response = await fetch(STATE_API_URL, {
+                    method: "PUT",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "X-Sync-ID": syncId
+                    },
+                    body: JSON.stringify({ state: stateSnapshot, baseRevision: lastRemoteRevision }),
+                    keepalive: Boolean(options.keepalive)
+                });
+                if (response.status === 409) {
+                    const remoteRecord = await response.json();
+                    if (!remoteRecord.state || !Number.isInteger(remoteRecord.revision)) {
+                        throw new Error("Invalid synchronization conflict");
+                    }
+
+                    const remoteState = cloneState(remoteRecord.state);
+                    appState = mergeConcurrentState(lastSyncedState, remoteState, appState);
+                    lastSyncedState = remoteState;
+                    lastRemoteRevision = remoteRecord.revision;
+                    lastRemoteUpdatedAt = remoteRecord.updatedAt || null;
+                    localStateRevision += 1;
+                    hasPendingStateSync = true;
+                    localStorage.setItem(STORAGE_KEY, JSON.stringify(appState));
+                    renderState();
+                    updateDeviceSyncIndicator("syncing");
+                    return;
+                }
+                if (!response.ok) throw new Error("State sync failed");
+
+                const remoteRecord = await response.json();
+                lastRemoteUpdatedAt = remoteRecord.updatedAt || lastRemoteUpdatedAt;
+                lastRemoteRevision = remoteRecord.revision;
+                lastSyncedState = cloneState(stateSnapshot);
+                if (localStateRevision === revisionAtRequest) {
+                    hasPendingStateSync = false;
+                    updateDeviceSyncIndicator("synced");
+                }
+            } catch {
+                updateDeviceSyncIndicator(navigator.onLine ? "syncing" : "offline");
+                window.clearTimeout(syncTimer);
+                syncTimer = window.setTimeout(pushStateToApi, SYNC_RETRY_DELAY_MS);
+            } finally {
+                isPushingState = false;
+                if (hasPendingStateSync && localStateRevision !== revisionAtRequest) scheduleStateSync();
+            }
+        }
+
+        async function hydrateStateFromApi() {
+            if (hasPendingStateSync || isHydratingState) return;
+
+            const revisionAtRequest = localStateRevision;
+            isHydratingState = true;
+            updateDeviceSyncIndicator("syncing");
+
+            try {
+                const response = await fetch(STATE_API_URL, {
+                    headers: { "X-Sync-ID": syncId },
+                    cache: "no-store"
+                });
+
+                if (response.status === 204) {
+                    lastRemoteUpdatedAt = null;
+                    lastRemoteRevision = null;
+                    lastSyncedState = null;
+                    hasPendingStateSync = true;
+                    scheduleStateSync();
+                    return;
+                }
+
+                if (!response.ok) throw new Error("State hydration failed");
+
+                const remoteRecord = await response.json();
+                if (localStateRevision !== revisionAtRequest) {
+                    scheduleStateSync();
+                    return;
+                }
+
+                if (Number.isInteger(remoteRecord.revision) && remoteRecord.revision === lastRemoteRevision) {
+                    lastRemoteUpdatedAt = remoteRecord.updatedAt || lastRemoteUpdatedAt;
+                    updateDeviceSyncIndicator("synced");
+                    return;
+                }
+
+                appState = normalizeState(remoteRecord.state);
+                lastRemoteUpdatedAt = remoteRecord.updatedAt || null;
+                lastRemoteRevision = remoteRecord.revision;
+                lastSyncedState = cloneState(appState);
+                localStorage.setItem(STORAGE_KEY, JSON.stringify(appState));
+                renderState();
+                updateDeviceSyncIndicator("synced");
+            } catch {
+                updateDeviceSyncIndicator(navigator.onLine ? "syncing" : "offline");
+            } finally {
+                isHydratingState = false;
+            }
+        }
+
+        function resetToDefaults() {
+            if (confirm("Reset all dashboard balances and ledger history to baseline profile?")) {
+                appState = JSON.parse(JSON.stringify(DEFAULT_STATE));
+                saveState();
+                syncDOMWithState();
+                updateAllCalculations();
+                renderLedger();
+            }
+        }
+
+        function switchTab(tabId) {
+            ["dashboard", "ledger", "strategy"].forEach(id => {
+                document.getElementById(`tab-${id}`).classList.add("hidden");
+                const btn = document.getElementById(`tab-btn-${id}`);
+                btn.className = "py-5 px-3 text-sm transition-all tab-inactive flex items-center space-x-2";
+            });
+            
+            document.getElementById(`tab-${tabId}`).classList.remove("hidden");
+            const activeBtn = document.getElementById(`tab-btn-${tabId}`);
+            activeBtn.className = "py-5 px-3 text-sm transition-all tab-active flex items-center space-x-2";
+            
+            if (tabId === "dashboard") {
+                updateAllCalculations();
+            } else if (tabId === "ledger") {
+                renderLedger();
+            }
+        }
+
+        function syncDOMWithState() {
+            document.getElementById("input-main-balance").value = appState.funds.main.toFixed(2);
+            document.getElementById("slider-main-balance").value = appState.funds.main;
+            
+            document.getElementById("input-apt-balance").value = appState.funds.apt.toFixed(2);
+            document.getElementById("slider-apt-balance").value = appState.funds.apt;
+            
+            document.getElementById("input-wise-balance").value = appState.funds.wise.toFixed(2);
+            document.getElementById("slider-wise-balance").value = appState.funds.wise;
+            
+            document.getElementById("input-cash-balance").value = appState.funds.cash.toFixed(2);
+            document.getElementById("slider-cash-balance").value = appState.funds.cash;
+            
+            document.getElementById("input-inv-balance").value = appState.funds.inv.toFixed(2);
+            document.getElementById("slider-inv-balance").value = appState.funds.inv;
+
+            document.getElementById("slider-alloc-spend").value = appState.allocations.spend;
+            document.getElementById("val-alloc-spend").innerText = `${appState.allocations.spend} BAM`;
+            
+            document.getElementById("slider-alloc-apt").value = appState.allocations.apt;
+            document.getElementById("val-alloc-apt").innerText = `${appState.allocations.apt} BAM`;
+            
+            document.getElementById("slider-alloc-etf").value = appState.allocations.etf;
+            document.getElementById("val-alloc-etf").innerText = `${appState.allocations.etf} BAM`;
+            
+            document.getElementById("slider-alloc-debt").value = appState.allocations.debt;
+            document.getElementById("val-alloc-debt").innerText = `${appState.allocations.debt} BAM`;
+
+            document.getElementById("slider-return-rate").value = appState.expectedReturn;
+            document.getElementById("return-rate-val").innerText = `${appState.expectedReturn.toFixed(1)}%`;
+            
+            document.getElementById("stat-receivable").innerText = `${appState.receivable.toLocaleString('en-US', {minimumFractionDigits: 2})} BAM`;
+            if (appState.receivable <= 0) {
+                document.getElementById("receivable-badge").className = "text-[10px] bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 px-1.5 py-0.5 rounded font-mono";
+                document.getElementById("receivable-badge").innerText = "CLEARED / CLAIMED";
+                document.getElementById("btn-claim-rec").classList.add("hidden");
+            } else {
+                document.getElementById("receivable-badge").className = "text-[10px] bg-amber-500/20 text-amber-300 border border-amber-500/30 px-1.5 py-0.5 rounded font-mono";
+                document.getElementById("receivable-badge").innerText = "0 BAM Liquid";
+                document.getElementById("btn-claim-rec").classList.remove("hidden");
+            }
+        }
+
+        function claimReceivable() {
+            if (appState.receivable <= 0) return;
+            const target = confirm("Has the 5,000 EUR (9,779.15 BAM) old employer debt officially cleared into your bank account?\n\nClick OK to deposit into Main Debit Account.\nClick Cancel to deposit into Wise Account.");
+            const accKey = target ? "card-main" : "card-wise";
+            const accName = target ? "Main Debit Account" : "Wise Account";
+            
+            const clearedAmount = appState.receivable;
+            adjustAccountBalance(accKey, clearedAmount);
+            appState.receivable = 0;
+            
+            appState.transactions.unshift({
+                id: Date.now(),
+                date: new Date().toISOString().split("T")[0],
+                type: "income",
+                category: "Former Employer Receivable Payoff",
+                method: accKey,
+                targetAccount: "",
+                amount: clearedAmount,
+                notes: "High-risk receivable officially cleared and claimed into liquid assets."
+            });
+            
+            saveState();
+            syncDOMWithState();
+            updateAllCalculations();
+            renderLedger();
+            alert(`Receivable Claimed Successfully!\n+${clearedAmount.toFixed(2)} BAM added to your ${accName}.`);
+        }
+
+        function updateFundValue(fundKey, val) {
+            const numVal = parseFloat(val) || 0;
+            appState.funds[fundKey] = numVal;
+            
+            if (document.activeElement.id === `input-${fundKey}-balance`) {
+                document.getElementById(`slider-${fundKey}-balance`).value = numVal;
+            } else {
+                document.getElementById(`input-${fundKey}-balance`).value = numVal.toFixed(2);
+            }
+            
+            saveState();
+            updateAllCalculations();
+        }
+
+        function updateAllocation(allocKey, val) {
+            const numVal = parseInt(val) || 0;
+            appState.allocations[allocKey] = numVal;
+            document.getElementById(`val-alloc-${allocKey}`).innerText = `${numVal} BAM`;
+            
+            saveState();
+            updateUnallocatedPool();
+        }
+
+        function updateUnallocatedPool() {
+            const totalAllocated = appState.allocations.spend + appState.allocations.apt + appState.allocations.etf + appState.allocations.debt;
+            const unallocated = 1700 - totalAllocated;
+            const badge = document.getElementById("unallocated-badge");
+            
+            if (unallocated < 0) {
+                badge.className = "text-base font-bold font-mono text-rose-400";
+                badge.innerText = `${unallocated.toFixed(2)} BAM (OVER)`;
+            } else if (unallocated === 0) {
+                badge.className = "text-base font-bold font-mono text-emerald-400";
+                badge.innerText = "0.00 BAM (BALANCED)";
+            } else {
+                badge.className = "text-base font-bold font-mono text-amber-400";
+                badge.innerText = `+${unallocated.toFixed(2)} BAM (FREE)`;
+            }
+            
+            const savingsVelocity = ((appState.allocations.apt + appState.allocations.etf + appState.allocations.debt) / 1700) * 100;
+            document.getElementById("stat-savings-rate").innerText = `Velocity: ${savingsVelocity.toFixed(1)}%`;
+        }
+
+        function updateAllCalculations() {
+            const f = appState.funds;
+            const totalLiquid = f.main + f.apt + f.wise + f.cash;
+            const totalAssets = totalLiquid + f.inv;
+            
+            document.getElementById("stat-liquid-assets").innerText = `${totalLiquid.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})} BAM`;
+            document.getElementById("stat-liquid-eur").innerText = `~${(totalLiquid / EUR_TO_BAM).toFixed(2)} EUR`;
+            
+            document.getElementById("stat-invested").innerText = `${f.inv.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})} BAM`;
+            document.getElementById("chart-total-assets").innerText = `${totalAssets.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})} BAM`;
+
+            document.getElementById("main-eur-display").innerText = `~${(f.main / EUR_TO_BAM).toFixed(2)} EUR`;
+            document.getElementById("apt-eur-display").innerText = `~${(f.apt / EUR_TO_BAM).toFixed(2)} EUR`;
+            document.getElementById("wise-eur-display").innerText = `~${(f.wise / EUR_TO_BAM).toFixed(2)} EUR`;
+            document.getElementById("cash-eur-display").innerText = `~${(f.cash / EUR_TO_BAM).toFixed(2)} EUR`;
+            document.getElementById("inv-eur-display").innerText = `~${(f.inv / EUR_TO_BAM).toFixed(2)} EUR`;
+
+            updateUnallocatedPool();
+            updateCharts();
+            updateProjectionChart(appState.expectedReturn);
+        }
+
+        function initCharts() {
+            const ctxDonut = document.getElementById("assetsDonutChart").getContext("2d");
+            assetsDonutChart = new Chart(ctxDonut, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Main Debit', 'Apartment Fund', 'Wise Account', 'Physical Cash', 'ETF'],
+                    datasets: [{
+                        data: [appState.funds.main, appState.funds.apt, appState.funds.wise, appState.funds.cash, appState.funds.inv],
+                        backgroundColor: ['#3b82f6', '#a855f7', '#06b6d4', '#f59e0b', '#10b981'],
+                        borderColor: '#0f172a',
+                        borderWidth: 2,
+                        hoverOffset: 4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    cutout: '72%',
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    const val = context.raw || 0;
+                                    const eurVal = (val / EUR_TO_BAM).toFixed(2);
+                                    return `${context.label}: ${val.toLocaleString('en-US', {minimumFractionDigits: 2})} BAM (~${eurVal} €)`;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+
+            const ctxProj = document.getElementById("projectionChart").getContext("2d");
+            projectionChart = new Chart(ctxProj, {
+                type: 'line',
+                data: {
+                    labels: Array.from({length: 31}, (_, i) => `Yr ${i}`),
+                    datasets: [
+                        {
+                            label: 'Total Portfolio Value (ETF)',
+                            data: [],
+                            borderColor: '#10b981',
+                            backgroundColor: 'rgba(16, 185, 129, 0.1)',
+                            fill: true,
+                            tension: 0.3,
+                            borderWidth: 3,
+                            pointRadius: 0
+                        },
+                        {
+                            label: 'Total Capital Contributed',
+                            data: [],
+                            borderColor: '#64748b',
+                            borderDash: [5, 5],
+                            fill: false,
+                            tension: 0,
+                            borderWidth: 2,
+                            pointRadius: 0
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        x: { grid: { color: 'rgba(51, 65, 85, 0.3)' }, ticks: { color: '#94a3b8', font: { size: 10 } } },
+                        y: { 
+                            grid: { color: 'rgba(51, 65, 85, 0.3)' }, 
+                            ticks: { 
+                                color: '#94a3b8', 
+                                font: { size: 10 },
+                                callback: function(value) {
+                                    return (value / 1000).toFixed(0) + 'k BAM';
+                                }
+                            } 
+                        }
+                    },
+                    plugins: {
+                        legend: { labels: { color: '#e2e8f0', font: { size: 11 } } },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return `${context.dataset.label}: ${context.raw.toLocaleString('en-US', {maximumFractionDigits: 0})} BAM`;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        function updateCharts() {
+            if (assetsDonutChart) {
+                assetsDonutChart.data.datasets[0].data = [
+                    appState.funds.main,
+                    appState.funds.apt,
+                    appState.funds.wise,
+                    appState.funds.cash,
+                    appState.funds.inv
+                ];
+                assetsDonutChart.update();
+            }
+        }
+
+        function updateProjectionChart(rate) {
+            const numRate = parseFloat(rate) || 8.0;
+            appState.expectedReturn = numRate;
+            document.getElementById("return-rate-val").innerText = `${numRate.toFixed(1)}%`;
+            
+            const monthlyContrib = appState.allocations.etf || 200;
+            const startVal = appState.funds.inv || 287.51;
+            const monthlyRate = (numRate / 100) / 12;
+            
+            let totalVal = startVal;
+            let totalContrib = startVal;
+            const valSeries = [startVal];
+            const contribSeries = [startVal];
+
+            for (let yr = 1; yr <= 30; yr++) {
+                for (let m = 0; m < 12; m++) {
+                    totalVal = (totalVal + monthlyContrib) * (1 + monthlyRate);
+                    totalContrib += monthlyContrib;
+                }
+                valSeries.push(Math.round(totalVal));
+                contribSeries.push(Math.round(totalContrib));
+            }
+
+            if (projectionChart) {
+                projectionChart.data.datasets[0].data = valSeries;
+                projectionChart.data.datasets[1].data = contribSeries;
+                projectionChart.update();
+            }
+
+            const finalVal = valSeries[30];
+            const finalContrib = contribSeries[30];
+            const interestEarned = finalVal - finalContrib;
+
+            document.getElementById("proj-final-val").innerText = `${finalVal.toLocaleString()} BAM`;
+            document.getElementById("proj-contributions").innerText = `${finalContrib.toLocaleString()} BAM`;
+            document.getElementById("proj-interest").innerText = `${interestEarned.toLocaleString()} BAM`;
+            
+            saveState();
+        }
+
+        function populateCategories() {
+            const type = document.getElementById("tx-type").value;
+            const select = document.getElementById("tx-category");
+            select.innerHTML = "";
+            
+            let list = EXPENSE_CATEGORIES;
+            if (type === "income") list = INCOME_CATEGORIES;
+            if (type === "transfer") list = TRANSFER_CATEGORIES;
+
+            list.forEach(cat => {
+                const opt = document.createElement("option");
+                opt.value = cat;
+                opt.innerText = cat;
+                select.appendChild(opt);
+            });
+            handleCategoryChange();
+        }
+
+        function setTxType(type) {
+            document.getElementById("tx-type").value = type;
+            const btnExp = document.getElementById("btn-type-expense");
+            const btnInc = document.getElementById("btn-type-income");
+            const btnTrf = document.getElementById("btn-type-transfer");
+            const btnSubmit = document.getElementById("btn-submit-text");
+            const labelCat = document.getElementById("label-category");
+            const labelMethod = document.getElementById("label-method");
+            const targetContainer = document.getElementById("transfer-target-container");
+            const btnMain = document.getElementById("btn-submit-main");
+
+            btnExp.className = "px-3 py-1.5 rounded-md font-semibold transition text-slate-400 hover:text-white";
+            btnInc.className = "px-3 py-1.5 rounded-md font-semibold transition text-slate-400 hover:text-white";
+            btnTrf.className = "px-3 py-1.5 rounded-md font-semibold transition text-slate-400 hover:text-white";
+
+            if (type === "expense") {
+                btnExp.className = "px-3 py-1.5 rounded-md font-semibold transition bg-rose-600 text-white shadow";
+                btnSubmit.innerText = "Log Expense Transaction";
+                labelCat.innerText = "Expense Category";
+                labelMethod.innerText = "Payment Method / From Account";
+                targetContainer.classList.add("hidden");
+                btnMain.className = "w-full bg-gradient-to-r from-rose-600 to-pink-600 hover:from-rose-500 hover:to-pink-500 text-white font-semibold py-3 px-4 rounded-xl shadow-lg transition flex items-center justify-center space-x-2";
+            } else if (type === "income") {
+                btnInc.className = "px-3 py-1.5 rounded-md font-semibold transition bg-emerald-600 text-white shadow";
+                btnSubmit.innerText = "Log Income Transaction";
+                labelCat.innerText = "Income Source";
+                labelMethod.innerText = "Destination Account (Deposit To)";
+                targetContainer.classList.add("hidden");
+                btnMain.className = "w-full bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-semibold py-3 px-4 rounded-xl shadow-lg transition flex items-center justify-center space-x-2";
+            } else if (type === "transfer") {
+                btnTrf.className = "px-3 py-1.5 rounded-md font-semibold transition bg-purple-600 text-white shadow";
+                btnSubmit.innerText = "Execute Internal Transfer";
+                labelCat.innerText = "Transfer Reason / Category";
+                labelMethod.innerText = "Source Account (Transfer From)";
+                targetContainer.classList.remove("hidden");
+                btnMain.className = "w-full bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white font-semibold py-3 px-4 rounded-xl shadow-lg transition flex items-center justify-center space-x-2";
+            }
+            populateCategories();
+        }
+
+        function handleCategoryChange() {
+            const cat = document.getElementById("tx-category").value;
+            const methodSelect = document.getElementById("tx-method");
+            const prompt = document.getElementById("soccer-cash-prompt");
+
+            if (cat.includes("Soccer")) {
+                prompt.classList.remove("hidden");
+                methodSelect.value = "cash";
+            } else {
+                prompt.classList.add("hidden");
+            }
+        }
+
+        function updateCurrencyPreview() {
+            const amount = parseFloat(document.getElementById("tx-amount").value) || 0;
+            const curr = document.getElementById("tx-currency").value;
+            const preview = document.getElementById("tx-conv-preview");
+            
+            if (amount === 0) {
+                preview.innerText = "";
+                return;
+            }
+
+            if (curr === "EUR") {
+                const bamVal = amount * EUR_TO_BAM;
+                preview.innerText = `≈ ${bamVal.toFixed(2)} BAM (Fixed Peg: 1.95583)`;
+            } else {
+                const eurVal = amount / EUR_TO_BAM;
+                preview.innerText = `≈ ${eurVal.toFixed(2)} EUR (€)`;
+            }
+        }
+
+        document.getElementById("tx-amount").addEventListener("input", updateCurrencyPreview);
+
+        function adjustAccountBalance(accKey, deltaBAM) {
+            if (accKey === "card-main") appState.funds.main = Math.max(0, appState.funds.main + deltaBAM);
+            else if (accKey === "apt-fund") appState.funds.apt = Math.max(0, appState.funds.apt + deltaBAM);
+            else if (accKey === "card-wise") appState.funds.wise = Math.max(0, appState.funds.wise + deltaBAM);
+            else if (accKey === "cash") appState.funds.cash = Math.max(0, appState.funds.cash + deltaBAM);
+            else if (accKey === "inv") appState.funds.inv = Math.max(0, appState.funds.inv + deltaBAM);
+        }
+
+        function handleLogTransaction(e) {
+            e.preventDefault();
+            const type = document.getElementById("tx-type").value;
+            const category = document.getElementById("tx-category").value;
+            let method = document.getElementById("tx-method").value;
+            const targetAccount = document.getElementById("tx-target-account").value;
+            const rawAmount = parseFloat(document.getElementById("tx-amount").value);
+            const curr = document.getElementById("tx-currency").value;
+            const date = document.getElementById("tx-date").value;
+            const notes = document.getElementById("tx-notes").value;
+
+            if (isNaN(rawAmount) || rawAmount <= 0) {
+                alert("Please enter a valid amount greater than 0.");
+                return;
+            }
+
+            const amountBAM = curr === "EUR" ? rawAmount * EUR_TO_BAM : rawAmount;
+
+            if (category.includes("Soccer")) {
+                const action = document.querySelector('input[name="soccer_action"]:checked').value;
+                if (action === "deposit_main") {
+                    method = "card-main";
+                }
+            }
+
+            if (type === "transfer") {
+                if (method === targetAccount) {
+                    alert("Source and Destination accounts cannot be the same!");
+                    return;
+                }
+                adjustAccountBalance(method, -amountBAM);
+                adjustAccountBalance(targetAccount, amountBAM);
+            } else if (type === "income") {
+                adjustAccountBalance(method, amountBAM);
+            } else {
+                adjustAccountBalance(method, -amountBAM);
+                if (category === "Parental Debt Repayment") {
+                    appState.debtLiab = Math.min(0, appState.debtLiab + amountBAM);
+                    document.getElementById("stat-debt").innerText = `${appState.debtLiab.toLocaleString('en-US', {minimumFractionDigits: 2})} BAM`;
+                }
+            }
+
+            const newTx = {
+                id: Date.now(),
+                date,
+                type,
+                category,
+                method,
+                targetAccount: type === "transfer" ? targetAccount : "",
+                amount: amountBAM,
+                notes
+            };
+            appState.transactions.unshift(newTx);
+
+            // Auto-switch filter to the month of the new transaction so the user sees it
+            appState.selectedMonth = date.substring(0, 7);
+
+            saveState();
+            syncDOMWithState();
+            updateAllCalculations();
+            renderLedger();
+
+            document.getElementById("tx-amount").value = "";
+            document.getElementById("tx-notes").value = "";
+            document.getElementById("tx-conv-preview").innerText = "";
+            
+            const fromName = ACCOUNT_NAMES[method] || method;
+            const toName = ACCOUNT_NAMES[targetAccount] || targetAccount;
+            
+            if (type === "transfer") {
+                alert(`Transfer Successful!\nMoved ${amountBAM.toFixed(2)} BAM from ${fromName} to ${toName}.`);
+            } else {
+                alert(`Success! Logged ${amountBAM.toFixed(2)} BAM as ${type.toUpperCase()}.`);
+            }
+        }
+
+        function deleteTransaction(id) {
+            if (confirm("Delete this transaction from your ledger?")) {
+                const transaction = appState.transactions.find(t => t.id === id);
+                if (!transaction) return;
+
+                if (transaction.type === "income") {
+                    adjustAccountBalance(transaction.method, -transaction.amount);
+                } else if (transaction.type === "expense") {
+                    adjustAccountBalance(transaction.method, transaction.amount);
+                    if (transaction.category === "Parental Debt Repayment") {
+                        appState.debtLiab -= transaction.amount;
+                    }
+                } else if (transaction.type === "transfer") {
+                    adjustAccountBalance(transaction.targetAccount, -transaction.amount);
+                    adjustAccountBalance(transaction.method, transaction.amount);
+                }
+
+                appState.transactions = appState.transactions.filter(t => t.id !== id);
+                saveState();
+                syncDOMWithState();
+                updateAllCalculations();
+                renderLedger();
+            }
+        }
+
+        function filterTransactions(filter) {
+            appState.currentFilter = filter;
+            ["all", "income", "expense", "transfer", "cash", "card"].forEach(flt => {
+                const btn = document.getElementById(`flt-${flt}`);
+                if (flt === filter) {
+                    btn.className = "px-3 py-1 rounded-lg text-xs font-semibold bg-blue-600 text-white";
+                } else {
+                    btn.className = "px-3 py-1 rounded-lg text-xs font-semibold bg-slate-800 text-slate-300 hover:bg-slate-700";
+                }
+            });
+            renderLedger();
+        }
+
+        function changeMonthFilter(val) {
+            appState.selectedMonth = val;
+            saveState();
+            renderLedger();
+        }
+
+        function renderLedger() {
+            // 1. Populate Month Dropdown
+            const monthSelect = document.getElementById("month-filter");
+            const uniqueMonths = [...new Set(appState.transactions.map(t => t.date.substring(0, 7)))];
+            const currentM = getCurrentMonthStr();
+            if (!uniqueMonths.includes(currentM)) uniqueMonths.push(currentM);
+            uniqueMonths.sort().reverse(); // Newest first
+
+            monthSelect.innerHTML = `<option value="all">All Time</option>`;
+            uniqueMonths.forEach(mStr => {
+                const [y, m] = mStr.split("-");
+                const dateObj = new Date(y, m - 1);
+                const label = dateObj.toLocaleString('en-US', { month: 'long', year: 'numeric' });
+                const selected = mStr === appState.selectedMonth ? "selected" : "";
+                monthSelect.innerHTML += `<option value="${mStr}" ${selected}>${label}</option>`;
+            });
+
+            if (appState.selectedMonth === "all") monthSelect.value = "all";
+            else monthSelect.value = appState.selectedMonth;
+
+            // 2. ALL-TIME Cash / Card Balances 
+            let cashBal = appState.funds.cash; 
+            let cardBal = appState.funds.main + appState.funds.wise;
+
+            document.getElementById("ledger-cash-bal").innerText = `Cash: ${cashBal.toLocaleString('en-US', {minimumFractionDigits: 0})} BAM`;
+            document.getElementById("ledger-card-bal").innerText = `Card: ${cardBal.toLocaleString('en-US', {minimumFractionDigits: 0})} BAM`;
+
+            // 3. Filter transactions by Selected Month
+            let monthTx = appState.transactions;
+            if (appState.selectedMonth !== "all") {
+                monthTx = appState.transactions.filter(t => t.date.startsWith(appState.selectedMonth));
+                document.getElementById("ledger-inc-label").innerText = "Total Income (Selected Month)";
+                document.getElementById("ledger-exp-label").innerText = "Total Expenses (Selected Month)";
+                document.getElementById("ledger-net-label").innerText = "Net Flow (Selected Month)";
+                document.getElementById("breakdown-subtitle").innerText = "Where your money goes (Selected Month)";
+            } else {
+                document.getElementById("ledger-inc-label").innerText = "Total Income (All Time)";
+                document.getElementById("ledger-exp-label").innerText = "Total Expenses (All Time)";
+                document.getElementById("ledger-net-label").innerText = "Net Flow (All Time)";
+                document.getElementById("breakdown-subtitle").innerText = "Where your money goes (All Time)";
+            }
+
+            // 4. Calculate Flow Metrics for the Selected Period
+            let totalInc = 0;
+            let totalExp = 0;
+            const categorySums = {};
+
+            monthTx.forEach(t => {
+                if (t.type === "income") totalInc += t.amount;
+                if (t.type === "expense") {
+                    totalExp += t.amount;
+                    categorySums[t.category] = (categorySums[t.category] || 0) + t.amount;
+                }
+            });
+
+            document.getElementById("ledger-total-income").innerText = `${totalInc.toLocaleString('en-US', {minimumFractionDigits: 2})} BAM`;
+            document.getElementById("ledger-total-expense").innerText = `${totalExp.toLocaleString('en-US', {minimumFractionDigits: 2})} BAM`;
+            
+            const netFlow = totalInc - totalExp;
+            const netEl = document.getElementById("ledger-net-flow");
+            netEl.innerText = `${netFlow >= 0 ? "+" : ""}${netFlow.toLocaleString('en-US', {minimumFractionDigits: 2})} BAM`;
+            netEl.className = `text-2xl font-bold font-mono mt-1 ${netFlow >= 0 ? "text-blue-400" : "text-rose-400"}`;
+
+            // 5. Apply secondary filter (Income/Expense/etc.) to Table
+            const filteredTx = monthTx.filter(t => {
+                if (appState.currentFilter === "income") return t.type === "income";
+                if (appState.currentFilter === "expense") return t.type === "expense";
+                if (appState.currentFilter === "transfer") return t.type === "transfer";
+                if (appState.currentFilter === "cash") return t.method === "cash" || t.targetAccount === "cash";
+                if (appState.currentFilter === "card") return t.method.includes("card") || t.method === "apt-fund" || t.targetAccount === "apt-fund";
+                return true;
+            });
+
+            const tbody = document.getElementById("tx-table-body");
+            tbody.innerHTML = "";
+
+            if (filteredTx.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="7" class="py-8 text-center text-slate-500">No transactions found matching this filter for the selected period.</td></tr>`;
+            } else {
+                filteredTx.forEach(t => {
+                    const tr = document.createElement("tr");
+                    tr.className = "hover:bg-slate-800/40 transition";
+                    
+                    let badge = "";
+                    let methodDisplay = "";
+                    let amtDisplay = "";
+
+                    if (t.type === "income") {
+                        badge = `<span class="px-2 py-0.5 rounded text-xs font-bold bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">INCOME</span>`;
+                        methodDisplay = `<span class="text-xs text-slate-300"><i class="fa-solid fa-arrow-down-left mr-1 text-emerald-400"></i>To ${ACCOUNT_NAMES[t.method] || t.method}</span>`;
+                        amtDisplay = `<span class="text-emerald-400 font-bold">+${t.amount.toLocaleString('en-US', {minimumFractionDigits: 2})} BAM</span>`;
+                    } else if (t.type === "expense") {
+                        badge = `<span class="px-2 py-0.5 rounded text-xs font-bold bg-rose-500/20 text-rose-400 border border-rose-500/30">EXPENSE</span>`;
+                        methodDisplay = `<span class="text-xs text-slate-300"><i class="fa-solid fa-arrow-up-right mr-1 text-rose-400"></i>From ${ACCOUNT_NAMES[t.method] || t.method}</span>`;
+                        amtDisplay = `<span class="text-rose-400 font-bold">-${t.amount.toLocaleString('en-US', {minimumFractionDigits: 2})} BAM</span>`;
+                    } else {
+                        badge = `<span class="px-2 py-0.5 rounded text-xs font-bold bg-purple-500/20 text-purple-300 border border-purple-500/30">TRANSFER</span>`;
+                        const fromName = ACCOUNT_NAMES[t.method] || t.method;
+                        const toName = ACCOUNT_NAMES[t.targetAccount] || t.targetAccount;
+                        methodDisplay = `<span class="text-xs text-purple-200"><i class="fa-solid fa-right-left mr-1 text-purple-400"></i>${fromName} &rarr; ${toName}</span>`;
+                        amtDisplay = `<span class="text-purple-300 font-bold font-mono">⇄ ${t.amount.toLocaleString('en-US', {minimumFractionDigits: 2})} BAM</span>`;
+                    }
+
+                    tr.innerHTML = `
+                        <td data-label="Date" class="py-3 px-4 font-mono text-xs text-slate-400">${t.date}</td>
+                        <td data-label="Type" class="py-3 px-4">${badge}</td>
+                        <td data-label="Category / Purpose" class="py-3 px-4 font-semibold text-white">${t.category}</td>
+                        <td data-label="Account" class="py-3 px-4">${methodDisplay}</td>
+                        <td data-label="Description" class="py-3 px-4 text-slate-300 text-xs">${t.notes || "—"}</td>
+                        <td data-label="Amount" class="py-3 px-4 text-right font-mono">${amtDisplay}</td>
+                        <td data-label="Action" class="py-3 px-4 text-center">
+                            <button onclick="deleteTransaction(${t.id})" class="text-slate-500 hover:text-rose-400 transition" title="Delete entry">
+                                <i class="fa-solid fa-trash"></i>
+                            </button>
+                        </td>
+                    `;
+                    tbody.appendChild(tr);
+                });
+            }
+
+            const progressContainer = document.getElementById("category-progress-container");
+            progressContainer.innerHTML = "";
+
+            const categoriesSorted = Object.entries(categorySums).sort((a, b) => b[1] - a[1]);
+            
+            if (categoriesSorted.length === 0) {
+                progressContainer.innerHTML = `<p class="text-xs text-slate-500 text-center py-4">No expense data logged for this period.</p>`;
+                document.getElementById("top-spend-cat").innerText = "None yet";
+            } else {
+                document.getElementById("top-spend-cat").innerText = `${categoriesSorted[0][0]} (${categoriesSorted[0][1].toFixed(0)} BAM)`;
+                
+                categoriesSorted.forEach(([cat, sum]) => {
+                    const pct = totalExp > 0 ? (sum / totalExp) * 100 : 0;
+                    const div = document.createElement("div");
+                    div.className = "space-y-1";
+                    div.innerHTML = `
+                        <div class="flex justify-between text-xs">
+                            <span class="font-medium text-slate-300">${cat}</span>
+                            <span class="font-mono font-semibold text-slate-400">${sum.toLocaleString('en-US', {minimumFractionDigits: 2})} BAM (${pct.toFixed(1)}%)</span>
+                        </div>
+                        <div class="w-full bg-slate-950 h-2 rounded-full overflow-hidden border border-slate-800">
+                            <div class="bg-gradient-to-r from-blue-500 to-indigo-500 h-full rounded-full transition-all duration-500" style="width: ${pct}%"></div>
+                        </div>
+                    `;
+                    progressContainer.appendChild(div);
+                });
+            }
+        }
+
+        function generateAIInsights() {
+            const box = document.getElementById("ai-output-box");
+            box.innerHTML = `
+                <div class="flex items-center space-x-3 text-blue-400 py-4">
+                    <i class="fa-solid fa-circle-notch fa-spin text-xl"></i>
+                    <span>Auditing your live ledger balances, savings velocity, and Monday accountability rules...</span>
+                </div>
+            `;
+
+            setTimeout(() => {
+                const f = appState.funds;
+                const a = appState.allocations;
+                const totalLiquid = f.main + f.apt + f.wise + f.cash;
+                const savingsVelocity = ((a.apt + a.etf + a.debt) / 1700) * 100;
+                
+                let analysis = `
+                    <div class="space-y-3 text-left w-full animate-fadeIn">
+                        <div class="flex items-center justify-between border-b border-slate-800 pb-2">
+                            <span class="text-xs font-bold text-blue-400 uppercase tracking-wider"><i class="fa-solid fa-check-double mr-1.5"></i> Monday Accountability Report</span>
+                            <span class="text-[11px] bg-blue-900/60 border border-blue-700 text-blue-300 px-2 py-0.5 rounded font-mono font-bold">Velocity: ${savingsVelocity.toFixed(1)}%</span>
+                        </div>
+                        <p class="text-sm text-slate-200 leading-relaxed">
+                            <strong class="text-white">1. Liquid Reserve & Spend Audit:</strong> You hold <strong class="text-blue-400">${totalLiquid.toLocaleString()} BAM</strong> (~${(totalLiquid/EUR_TO_BAM).toFixed(0)} EUR) across operational accounts. Your Main Debit balance (${f.main.toFixed(0)} BAM) provides an optimal 2.2-month living buffer based on your ${a.spend} BAM monthly spend limit.
+                        </p>
+                        <p class="text-sm text-slate-200 leading-relaxed">
+                            <strong class="text-purple-400">2. Pillar 1 (Apartment 2027/2028 Target):</strong> With your ${a.apt} BAM monthly deployment into your <em class="text-purple-300">Štedni račun</em>, your internal transfers are perfectly isolating down payment capital without FX risk under the Central Bank peg.
+                        </p>
+                        <p class="text-sm text-slate-200 leading-relaxed">
+                            <strong class="text-emerald-400">3. Pillar 2 (0.05% TER Core):</strong> Keep executing your 200 BAM monthly purchase. By utilizing FBiH's 0% capital gains tax exemption on long-term holdings, this discipline builds over <strong class="text-emerald-400">304,000 BAM</strong> in tax-free wealth over 30 years.
+                        </p>
+                        <p class="text-sm text-slate-200 leading-relaxed">
+                            <strong class="text-amber-400">4. Soccer Cash & Debt Protocol:</strong> If you earned physical soccer cash over the weekend, split it 50/50: deposit half into Main Debit to boost your property down payment, and hand the remaining physical cash to your parents to accelerate the 10,825 EUR 0% loan without paying electronic wire fees.
+                        </p>
+                    </div>
+                `;
+                box.innerHTML = analysis;
+            }, 800);
+        }
+    </script>
+</body>
+</html>
