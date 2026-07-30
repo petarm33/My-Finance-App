@@ -1764,11 +1764,13 @@
         }
 
         function handleCategoryChange() {
+            const type = document.getElementById("tx-type").value;
             const cat = document.getElementById("tx-category").value;
             const methodSelect = document.getElementById("tx-method");
             const prompt = document.getElementById("soccer-cash-prompt");
 
-            if (cat.includes("Soccer")) {
+            // Only trigger the cash protocol for actual Soccer INCOME, not expenses
+            if (type === "income" && cat.includes("Soccer")) {
                 prompt.classList.remove("hidden");
                 methodSelect.value = "cash";
             } else {
