@@ -46,7 +46,7 @@
                 font-size: 0.875rem;
             }
             .reset-button i { margin-right: 0; }
-            .reset-label, .sync-label { display: none; }
+            .reset-label { display: none; }
             .primary-tabs {
                 order: 3;
                 display: grid;
@@ -200,9 +200,6 @@
                     </button>
                 </nav>
                 <div class="flex items-center space-x-3">
-                    <button id="device-sync-button" onclick="openDeviceSyncModal()" class="reset-button text-xs bg-emerald-600/20 hover:bg-emerald-600/30 text-emerald-300 hover:text-emerald-200 px-3 py-1.5 rounded-md transition border border-emerald-500/40" aria-label="Automatic device sync is on" title="Automatic device sync is on">
-                        <i id="device-sync-icon" class="fa-solid fa-cloud-arrow-up mr-1"></i> <span id="device-sync-label" class="sync-label">Auto Sync On</span>
-                    </button>
                     <button onclick="resetToDefaults()" class="reset-button text-xs bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white px-3 py-1.5 rounded-md transition border border-slate-700" aria-label="Reset data">
                         <i class="fa-solid fa-rotate-right mr-1"></i> <span class="reset-label">Reset Data</span>
                     </button>
@@ -594,7 +591,7 @@
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div>
                                 <label class="block text-xs font-medium text-slate-300 mb-1.5" id="label-category">Expense Category</label>
-                                <select id="tx-category" onchange="handleCategoryChange()" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3.5 py-2.5 text-sm text-white focus:outline-none focus:border-blue-500">
+                                <select id="tx-category" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3.5 py-2.5 text-sm text-white focus:outline-none focus:border-blue-500">
                                 </select>
                             </div>
 
@@ -618,23 +615,6 @@
                                 <option value="cash">Physical Cash</option>
                                 <option value="inv">ETF Investment</option>
                             </select>
-                        </div>
-
-                        <div id="soccer-cash-prompt" class="hidden bg-amber-950/40 border border-amber-600/50 rounded-xl p-4 text-xs space-y-2 animate-fadeIn">
-                            <div class="flex items-center text-amber-300 font-bold text-sm">
-                                <i class="fa-solid fa-soccer-ball mr-2 text-amber-400"></i> Physical Soccer Cash Protocol Triggered
-                            </div>
-                            <p class="text-slate-300">How would you like to direct this physical match income under your Monday accountability rules?</p>
-                            <div class="flex flex-wrap gap-3 pt-1">
-                                <label class="flex items-center space-x-2 bg-amber-900/40 px-3 py-1.5 rounded-lg border border-amber-700/50 cursor-pointer">
-                                    <input type="radio" name="soccer_action" value="deposit_main" checked class="accent-amber-500">
-                                    <span class="text-amber-200">Deposit to Main Bank Account (Electronic 50/30/20)</span>
-                                </label>
-                                <label class="flex items-center space-x-2 bg-amber-900/40 px-3 py-1.5 rounded-lg border border-amber-700/50 cursor-pointer">
-                                    <input type="radio" name="soccer_action" value="keep_cash" class="accent-amber-500">
-                                    <span class="text-amber-200">Keep as Physical Cash (For pocket spend / Debt payback)</span>
-                                </label>
-                            </div>
                         </div>
 
                         <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -829,73 +809,15 @@
 
     </main>
 
-    <div id="device-sync-modal" class="hidden fixed inset-0 z-[100] overflow-y-auto overscroll-contain bg-slate-950/80 backdrop-blur-sm p-4" role="dialog" aria-modal="true" aria-labelledby="device-sync-title" onclick="closeDeviceSyncModal()">
-        <div class="min-h-full flex items-center justify-center py-2 sm:py-6">
-            <div class="w-full max-w-lg bg-slate-900 border border-slate-700 rounded-2xl shadow-2xl p-5 sm:p-6" onclick="event.stopPropagation()">
-                <div class="flex items-start justify-between gap-4">
-                    <div class="flex items-start gap-3">
-                        <div class="bg-blue-600/20 text-blue-300 border border-blue-500/30 rounded-xl p-3">
-                            <i class="fa-solid fa-arrows-rotate"></i>
-                        </div>
-                        <div>
-                            <h2 id="device-sync-title" class="text-lg font-bold text-white">Automatic Device Sync</h2>
-                            <p class="text-xs text-slate-400 mt-1">Connect once, then changes sync automatically on your desktop and phone.</p>
-                        </div>
-                    </div>
-                    <button onclick="closeDeviceSyncModal()" class="text-slate-400 hover:text-white p-2 -mr-2 -mt-2" aria-label="Close device sync">
-                        <i class="fa-solid fa-xmark text-lg"></i>
-                    </button>
-                </div>
-
-                <div class="mt-6 space-y-5">
-                    <section class="bg-slate-950/70 border border-slate-800 rounded-xl p-4">
-                        <div class="mb-4 flex items-center gap-2 rounded-lg border border-emerald-500/30 bg-emerald-500/10 px-3 py-2 text-xs text-emerald-200">
-                            <i class="fa-solid fa-circle-check"></i>
-                            <span>Automatic sync stays active after this one-time setup.</span>
-                        </div>
-                        <p class="text-xs font-semibold uppercase tracking-wider text-slate-400">This device's sync code</p>
-                        <div class="mt-2 flex gap-2">
-                            <input id="current-sync-code" type="text" readonly class="min-w-0 flex-1 bg-slate-950 border border-slate-700 rounded-lg px-3 py-2.5 text-xs text-blue-300 font-mono focus:outline-none" aria-label="Current sync code">
-                            <button onclick="copySyncCode()" class="shrink-0 bg-blue-600 hover:bg-blue-500 text-white px-4 py-2.5 rounded-lg text-xs font-semibold transition">
-                                <i class="fa-regular fa-copy mr-1"></i> Copy
-                            </button>
-                        </div>
-                        <p class="text-[11px] text-amber-300/90 mt-2"><i class="fa-solid fa-lock mr-1"></i>Keep this code private. Anyone with it can access this dashboard data.</p>
-                    </section>
-
-                    <form id="device-sync-form" onsubmit="requestDeviceConnection(event)">
-                        <label for="link-sync-code" class="text-xs font-semibold uppercase tracking-wider text-slate-400">Connect this device to another one</label>
-                        <textarea id="link-sync-code" rows="3" spellcheck="false" autocomplete="off" placeholder="Paste the sync code from your other device" class="mt-2 w-full resize-none bg-slate-950 border border-slate-700 rounded-lg px-3 py-3 text-sm text-white font-mono placeholder:text-slate-600 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500"></textarea>
-                        <p id="device-sync-status" class="hidden mt-3 text-xs rounded-lg border px-3 py-2" role="status" aria-live="polite"></p>
-                        <div id="device-sync-confirmation" class="hidden mt-3 rounded-xl border border-amber-500/30 bg-amber-500/10 p-3" role="alert">
-                            <p class="text-xs leading-relaxed text-amber-100">This replaces the dashboard data on this device once. After connecting, all future changes sync automatically in both directions.</p>
-                            <div class="mt-3 grid grid-cols-2 gap-2">
-                                <button type="button" onclick="cancelDeviceConnection()" class="border border-slate-600 bg-slate-800 text-slate-200 px-3 py-2.5 rounded-lg text-xs font-semibold transition hover:bg-slate-700">Cancel</button>
-                                <button id="confirm-device-button" type="button" onclick="connectToSyncCode()" class="bg-amber-500 text-slate-950 px-3 py-2.5 rounded-lg text-xs font-bold transition hover:bg-amber-400 disabled:bg-slate-700 disabled:text-slate-400">Replace &amp; Load</button>
-                            </div>
-                        </div>
-                        <button id="connect-device-button" type="submit" class="mt-3 w-full bg-emerald-600 hover:bg-emerald-500 disabled:bg-slate-700 disabled:text-slate-400 text-white px-4 py-3 rounded-lg text-sm font-semibold transition">
-                            <i class="fa-solid fa-link mr-1.5"></i> Connect Once & Enable Auto Sync
-                        </button>
-                    </form>
-                </div>
-            </div>
-        </div>
-    </div>
-
     <!-- Footer -->
     <footer class="bg-slate-900 border-t border-slate-800 py-6 mt-12 text-center text-xs text-slate-500">
         <p>BiH Personal Wealth Management Portal &bull; Fixed Peg: 1 EUR = 1.95583 BAM &bull; Designed for FBiH Tax & Financial Compliance</p>
     </footer>
 
-    <!-- JAVASCRIPT ENGINE & STATE MANAGEMENT -->
+    <!-- JAVASCRIPT ENGINE & LOCAL STATE MANAGEMENT -->
     <script>
         const EUR_TO_BAM = 1.95583;
         const STORAGE_KEY = "bih_wealth_os_v4";
-        const SYNC_ID_KEY = `${STORAGE_KEY}_sync_id`;
-        const STATE_API_URL = "/api/user-state";
-        const ACTIVE_SYNC_INTERVAL_MS = 3_000;
-        const SYNC_RETRY_DELAY_MS = 3_000;
 
         const EXPENSE_CATEGORIES = [
             "Groceries & Supermarket",
@@ -982,60 +904,6 @@
             };
         }
 
-        function cloneState(state) {
-            return normalizeState(JSON.parse(JSON.stringify(state)));
-        }
-
-        function valuesMatch(left, right) {
-            return JSON.stringify(left) === JSON.stringify(right);
-        }
-
-        function mergeConcurrentState(baseCandidate, remoteCandidate, localCandidate) {
-            const base = cloneState(baseCandidate || remoteCandidate);
-            const remote = cloneState(remoteCandidate);
-            const local = cloneState(localCandidate);
-            const merged = { ...remote };
-
-            merged.funds = { ...remote.funds };
-            Object.keys(DEFAULT_STATE.funds).forEach(key => {
-                const baseValue = Number(base.funds[key]) || 0;
-                const remoteValue = Number(remote.funds[key]) || 0;
-                const localValue = Number(local.funds[key]) || 0;
-                merged.funds[key] = remoteValue + (localValue - baseValue);
-            });
-
-            merged.allocations = { ...remote.allocations };
-            Object.keys(DEFAULT_STATE.allocations).forEach(key => {
-                if (!valuesMatch(local.allocations[key], base.allocations[key])) {
-                    merged.allocations[key] = local.allocations[key];
-                }
-            });
-
-            merged.debtLiab = (Number(remote.debtLiab) || 0) + ((Number(local.debtLiab) || 0) - (Number(base.debtLiab) || 0));
-
-            ["selectedMonth", "currentFilter"].forEach(key => {
-                if (!valuesMatch(local[key], base[key])) merged[key] = local[key];
-            });
-
-            const baseTransactions = new Map(base.transactions.map(transaction => [String(transaction.id), transaction]));
-            const localTransactions = new Map(local.transactions.map(transaction => [String(transaction.id), transaction]));
-            const mergedTransactions = new Map(remote.transactions.map(transaction => [String(transaction.id), transaction]));
-
-            baseTransactions.forEach((baseTransaction, id) => {
-                if (!localTransactions.has(id)) {
-                    mergedTransactions.delete(id);
-                } else if (!valuesMatch(localTransactions.get(id), baseTransaction)) {
-                    mergedTransactions.set(id, localTransactions.get(id));
-                }
-            });
-            localTransactions.forEach((transaction, id) => {
-                if (!baseTransactions.has(id)) mergedTransactions.set(id, transaction);
-            });
-
-            merged.transactions = Array.from(mergedTransactions.values()).sort((left, right) => Number(right.id) - Number(left.id));
-            return normalizeState(merged);
-        }
-
         function loadLocalState() {
             try {
                 const storedState = localStorage.getItem(STORAGE_KEY);
@@ -1045,131 +913,26 @@
             }
         }
 
-        function getSyncId() {
-            const storedId = localStorage.getItem(SYNC_ID_KEY);
-            if (/^[a-f0-9]{64}$/.test(storedId || "")) return storedId;
-
-            const bytes = crypto.getRandomValues(new Uint8Array(32));
-            const syncId = Array.from(bytes, byte => byte.toString(16).padStart(2, "0")).join("");
-            localStorage.setItem(SYNC_ID_KEY, syncId);
-            return syncId;
-        }
-
         let appState = loadLocalState();
-        let syncId = getSyncId();
-        let localStateRevision = 0;
-        let syncTimer = null;
-        let hasPendingStateSync = false;
-        let isHydratingState = false;
-        let isPushingState = false;
-        let pendingSyncId = null;
-        let lastRemoteUpdatedAt = null;
-        let lastRemoteRevision = null;
-        let lastSyncedState = null;
-
         let assetsDonutChart = null;
         let projectionChart = null;
 
-        document.addEventListener("DOMContentLoaded", async () => {
+        document.addEventListener("DOMContentLoaded", () => {
             document.getElementById("tx-date").valueAsDate = new Date();
             populateCategories();
             syncDOMWithState();
             initCharts();
             updateAllCalculations();
             renderLedger();
-            await hydrateStateFromApi();
         });
 
-        window.addEventListener("online", () => {
-            updateDeviceSyncIndicator("syncing");
-            if (hasPendingStateSync) scheduleStateSync();
-            else hydrateStateFromApi();
-        });
-        window.addEventListener("focus", hydrateStateFromApi);
-        window.addEventListener("pageshow", hydrateStateFromApi);
-        document.addEventListener("visibilitychange", () => {
-            if (document.hidden) {
-                if (hasPendingStateSync) pushStateToApi({ keepalive: true });
-            } else {
-                hydrateStateFromApi();
-            }
-        });
-        window.addEventListener("pagehide", () => {
-            if (hasPendingStateSync) pushStateToApi({ keepalive: true });
-        });
         window.addEventListener("storage", event => {
-            if (event.key !== STORAGE_KEY || !event.newValue || hasPendingStateSync) return;
-
+            if (event.key !== STORAGE_KEY || !event.newValue) return;
             try {
                 appState = normalizeState(JSON.parse(event.newValue));
                 renderState();
             } catch {}
         });
-        window.setInterval(() => {
-            if (!document.hidden && navigator.onLine) hydrateStateFromApi();
-        }, ACTIVE_SYNC_INTERVAL_MS);
-        window.addEventListener("keydown", event => {
-            if (event.key === "Escape") closeDeviceSyncModal();
-        });
-
-        function openDeviceSyncModal() {
-            document.getElementById("current-sync-code").value = syncId;
-            document.getElementById("link-sync-code").value = "";
-            cancelDeviceConnection();
-            setDeviceSyncStatus("", "idle");
-            document.getElementById("device-sync-modal").classList.remove("hidden");
-            document.body.classList.add("overflow-hidden");
-        }
-
-        function closeDeviceSyncModal() {
-            document.getElementById("device-sync-modal").classList.add("hidden");
-            document.body.classList.remove("overflow-hidden");
-            cancelDeviceConnection();
-        }
-
-        function setDeviceSyncStatus(message, type) {
-            const status = document.getElementById("device-sync-status");
-            status.textContent = message;
-            status.className = "mt-3 text-xs rounded-lg border px-3 py-2";
-
-            if (!message || type === "idle") {
-                status.classList.add("hidden");
-            } else if (type === "success") {
-                status.classList.add("text-emerald-300", "bg-emerald-500/10", "border-emerald-500/30");
-            } else {
-                status.classList.add("text-rose-300", "bg-rose-500/10", "border-rose-500/30");
-            }
-        }
-
-        function updateDeviceSyncIndicator(status) {
-            const button = document.getElementById("device-sync-button");
-            const icon = document.getElementById("device-sync-icon");
-            const label = document.getElementById("device-sync-label");
-            if (!button || !icon || !label) return;
-
-            button.className = "reset-button text-xs px-3 py-1.5 rounded-md transition border";
-            icon.className = "fa-solid mr-1";
-
-            if (!navigator.onLine || status === "offline") {
-                button.classList.add("bg-amber-600/20", "hover:bg-amber-600/30", "text-amber-300", "border-amber-500/40");
-                icon.classList.add("fa-cloud-arrow-up");
-                label.textContent = "Sync Paused";
-                button.setAttribute("aria-label", "Automatic device sync is waiting for a connection");
-                button.title = "Offline changes sync automatically when the connection returns";
-            } else if (status === "syncing") {
-                button.classList.add("bg-blue-600/20", "hover:bg-blue-600/30", "text-blue-300", "border-blue-500/40");
-                icon.classList.add("fa-arrows-rotate", "fa-spin");
-                label.textContent = "Syncing";
-                button.setAttribute("aria-label", "Automatic device sync is working");
-                button.title = "Syncing changes automatically";
-            } else {
-                button.classList.add("bg-emerald-600/20", "hover:bg-emerald-600/30", "text-emerald-300", "border-emerald-500/40");
-                icon.classList.add("fa-cloud-arrow-up");
-                label.textContent = "Auto Sync On";
-                button.setAttribute("aria-label", "Automatic device sync is on");
-                button.title = "Changes sync automatically across connected devices";
-            }
-        }
 
         function renderState() {
             syncDOMWithState();
@@ -1177,224 +940,8 @@
             renderLedger();
         }
 
-        function showDeviceSyncStatus(message, type) {
-            setDeviceSyncStatus(message, type);
-            document.getElementById("device-sync-status").scrollIntoView({ block: "nearest", behavior: "smooth" });
-        }
-
-        async function copySyncCode() {
-            const codeInput = document.getElementById("current-sync-code");
-
-            try {
-                await navigator.clipboard.writeText(syncId);
-            } catch {
-                codeInput.select();
-                document.execCommand("copy");
-                window.getSelection()?.removeAllRanges();
-            }
-
-            setDeviceSyncStatus("Sync code copied. Paste it on your other device.", "success");
-        }
-
-        function requestDeviceConnection(event) {
-            event.preventDefault();
-            const codeInput = document.getElementById("link-sync-code");
-            const candidateSyncId = codeInput.value.trim().toLowerCase().replace(/[\s-]+/g, "");
-            codeInput.blur();
-
-            if (!/^[a-f0-9]{64}$/.test(candidateSyncId)) {
-                showDeviceSyncStatus("Paste the complete 64-character sync code.", "error");
-                return;
-            }
-
-            if (candidateSyncId === syncId) {
-                showDeviceSyncStatus("This device is already using that sync code.", "success");
-                return;
-            }
-
-            pendingSyncId = candidateSyncId;
-            setDeviceSyncStatus("", "idle");
-            document.getElementById("connect-device-button").classList.add("hidden");
-            const confirmation = document.getElementById("device-sync-confirmation");
-            confirmation.classList.remove("hidden");
-            confirmation.scrollIntoView({ block: "nearest", behavior: "smooth" });
-        }
-
-        function cancelDeviceConnection() {
-            pendingSyncId = null;
-            document.getElementById("device-sync-confirmation").classList.add("hidden");
-            document.getElementById("connect-device-button").classList.remove("hidden");
-        }
-
-        async function connectToSyncCode() {
-            if (!pendingSyncId) return;
-
-            const candidateSyncId = pendingSyncId;
-            const codeInput = document.getElementById("link-sync-code");
-            const confirmButton = document.getElementById("confirm-device-button");
-
-            confirmButton.disabled = true;
-            confirmButton.innerHTML = '<i class="fa-solid fa-spinner fa-spin mr-1.5"></i> Connecting...';
-            setDeviceSyncStatus("", "idle");
-
-            try {
-                const response = await fetch(STATE_API_URL, {
-                    headers: { "X-Sync-ID": candidateSyncId },
-                    cache: "no-store"
-                });
-
-                if (response.status === 204) {
-                    setDeviceSyncStatus("No saved data was found for that code. Open the other device, make a change, and try again.", "error");
-                    return;
-                }
-
-                if (!response.ok) throw new Error("Device connection failed");
-
-                const remoteRecord = await response.json();
-                window.clearTimeout(syncTimer);
-                syncId = candidateSyncId;
-                localStorage.setItem(SYNC_ID_KEY, syncId);
-                appState = normalizeState(remoteRecord.state);
-                localStateRevision += 1;
-                hasPendingStateSync = false;
-                lastRemoteUpdatedAt = remoteRecord.updatedAt || null;
-                lastRemoteRevision = remoteRecord.revision;
-                lastSyncedState = cloneState(appState);
-                localStorage.setItem(STORAGE_KEY, JSON.stringify(appState));
-                document.getElementById("current-sync-code").value = syncId;
-                codeInput.value = "";
-                cancelDeviceConnection();
-                renderState();
-                updateDeviceSyncIndicator("synced");
-                showDeviceSyncStatus("Connected. Future changes now sync automatically on both devices.", "success");
-            } catch {
-                showDeviceSyncStatus("Unable to connect right now. Check your connection and try again.", "error");
-            } finally {
-                confirmButton.disabled = false;
-                confirmButton.innerHTML = 'Replace &amp; Load';
-            }
-        }
-
         function saveState() {
             localStorage.setItem(STORAGE_KEY, JSON.stringify(appState));
-            localStateRevision += 1;
-            hasPendingStateSync = true;
-            updateDeviceSyncIndicator(navigator.onLine ? "syncing" : "offline");
-            scheduleStateSync();
-        }
-
-        function scheduleStateSync() {
-            window.clearTimeout(syncTimer);
-            syncTimer = window.setTimeout(pushStateToApi, 350);
-        }
-
-        async function pushStateToApi(options = {}) {
-            if (isPushingState || !hasPendingStateSync || !navigator.onLine) {
-                if (!navigator.onLine) updateDeviceSyncIndicator("offline");
-                return;
-            }
-
-            const stateSnapshot = JSON.parse(JSON.stringify(appState));
-            const revisionAtRequest = localStateRevision;
-            isPushingState = true;
-            updateDeviceSyncIndicator("syncing");
-
-            try {
-                const response = await fetch(STATE_API_URL, {
-                    method: "PUT",
-                    headers: {
-                        "Content-Type": "application/json",
-                        "X-Sync-ID": syncId
-                    },
-                    body: JSON.stringify({ state: stateSnapshot, baseRevision: lastRemoteRevision }),
-                    keepalive: Boolean(options.keepalive)
-                });
-                if (response.status === 409) {
-                    const remoteRecord = await response.json();
-                    if (!remoteRecord.state || !Number.isInteger(remoteRecord.revision)) {
-                        throw new Error("Invalid synchronization conflict");
-                    }
-
-                    const remoteState = cloneState(remoteRecord.state);
-                    appState = mergeConcurrentState(lastSyncedState, remoteState, appState);
-                    lastSyncedState = remoteState;
-                    lastRemoteRevision = remoteRecord.revision;
-                    lastRemoteUpdatedAt = remoteRecord.updatedAt || null;
-                    localStateRevision += 1;
-                    hasPendingStateSync = true;
-                    localStorage.setItem(STORAGE_KEY, JSON.stringify(appState));
-                    renderState();
-                    updateDeviceSyncIndicator("syncing");
-                    return;
-                }
-                if (!response.ok) throw new Error("State sync failed");
-
-                const remoteRecord = await response.json();
-                lastRemoteUpdatedAt = remoteRecord.updatedAt || lastRemoteUpdatedAt;
-                lastRemoteRevision = remoteRecord.revision;
-                lastSyncedState = cloneState(stateSnapshot);
-                if (localStateRevision === revisionAtRequest) {
-                    hasPendingStateSync = false;
-                    updateDeviceSyncIndicator("synced");
-                }
-            } catch {
-                updateDeviceSyncIndicator(navigator.onLine ? "syncing" : "offline");
-                window.clearTimeout(syncTimer);
-                syncTimer = window.setTimeout(pushStateToApi, SYNC_RETRY_DELAY_MS);
-            } finally {
-                isPushingState = false;
-                if (hasPendingStateSync && localStateRevision !== revisionAtRequest) scheduleStateSync();
-            }
-        }
-
-        async function hydrateStateFromApi() {
-            if (hasPendingStateSync || isHydratingState) return;
-
-            const revisionAtRequest = localStateRevision;
-            isHydratingState = true;
-            updateDeviceSyncIndicator("syncing");
-
-            try {
-                const response = await fetch(STATE_API_URL, {
-                    headers: { "X-Sync-ID": syncId },
-                    cache: "no-store"
-                });
-
-                if (response.status === 204) {
-                    lastRemoteUpdatedAt = null;
-                    lastRemoteRevision = null;
-                    lastSyncedState = null;
-                    hasPendingStateSync = true;
-                    scheduleStateSync();
-                    return;
-                }
-
-                if (!response.ok) throw new Error("State hydration failed");
-
-                const remoteRecord = await response.json();
-                if (localStateRevision !== revisionAtRequest) {
-                    scheduleStateSync();
-                    return;
-                }
-
-                if (Number.isInteger(remoteRecord.revision) && remoteRecord.revision === lastRemoteRevision) {
-                    lastRemoteUpdatedAt = remoteRecord.updatedAt || lastRemoteUpdatedAt;
-                    updateDeviceSyncIndicator("synced");
-                    return;
-                }
-
-                appState = normalizeState(remoteRecord.state);
-                lastRemoteUpdatedAt = remoteRecord.updatedAt || null;
-                lastRemoteRevision = remoteRecord.revision;
-                lastSyncedState = cloneState(appState);
-                localStorage.setItem(STORAGE_KEY, JSON.stringify(appState));
-                renderState();
-                updateDeviceSyncIndicator("synced");
-            } catch {
-                updateDeviceSyncIndicator(navigator.onLine ? "syncing" : "offline");
-            } finally {
-                isHydratingState = false;
-            }
         }
 
         function resetToDefaults() {
@@ -1720,7 +1267,6 @@
                 opt.innerText = cat;
                 select.appendChild(opt);
             });
-            handleCategoryChange();
         }
 
         function setTxType(type) {
@@ -1761,21 +1307,6 @@
                 btnMain.className = "w-full bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white font-semibold py-3 px-4 rounded-xl shadow-lg transition flex items-center justify-center space-x-2";
             }
             populateCategories();
-        }
-
-        function handleCategoryChange() {
-            const type = document.getElementById("tx-type").value;
-            const cat = document.getElementById("tx-category").value;
-            const methodSelect = document.getElementById("tx-method");
-            const prompt = document.getElementById("soccer-cash-prompt");
-
-            // Only trigger the cash protocol for actual Soccer INCOME, not expenses
-            if (type === "income" && cat.includes("Soccer")) {
-                prompt.classList.remove("hidden");
-                methodSelect.value = "cash";
-            } else {
-                prompt.classList.add("hidden");
-            }
         }
 
         function updateCurrencyPreview() {
@@ -1825,13 +1356,6 @@
 
             const amountBAM = curr === "EUR" ? rawAmount * EUR_TO_BAM : rawAmount;
 
-            if (category.includes("Soccer")) {
-                const action = document.querySelector('input[name="soccer_action"]:checked').value;
-                if (action === "deposit_main") {
-                    method = "card-main";
-                }
-            }
-
             if (type === "transfer") {
                 if (method === targetAccount) {
                     alert("Source and Destination accounts cannot be the same!");
@@ -1861,7 +1385,6 @@
             };
             appState.transactions.unshift(newTx);
 
-            // Auto-switch filter to the month of the new transaction so the user sees it
             appState.selectedMonth = date.substring(0, 7);
 
             saveState();
@@ -1933,7 +1456,7 @@
             const uniqueMonths = [...new Set(appState.transactions.map(t => t.date.substring(0, 7)))];
             const currentM = getCurrentMonthStr();
             if (!uniqueMonths.includes(currentM)) uniqueMonths.push(currentM);
-            uniqueMonths.sort().reverse(); // Newest first
+            uniqueMonths.sort().reverse();
 
             monthSelect.innerHTML = `<option value="all">All Time</option>`;
             uniqueMonths.forEach(mStr => {
@@ -1990,7 +1513,7 @@
             netEl.innerText = `${netFlow >= 0 ? "+" : ""}${netFlow.toLocaleString('en-US', {minimumFractionDigits: 2})} BAM`;
             netEl.className = `text-2xl font-bold font-mono mt-1 ${netFlow >= 0 ? "text-blue-400" : "text-rose-400"}`;
 
-            // 5. Apply secondary filter (Income/Expense/etc.) to Table
+            // 5. Apply secondary filter to Table
             const filteredTx = monthTx.filter(t => {
                 if (appState.currentFilter === "income") return t.type === "income";
                 if (appState.currentFilter === "expense") return t.type === "expense";
