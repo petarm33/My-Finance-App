@@ -1331,11 +1331,12 @@
         document.getElementById("tx-amount").addEventListener("input", updateCurrencyPreview);
 
         function adjustAccountBalance(accKey, deltaBAM) {
-            if (accKey === "card-main") appState.funds.main = Math.max(0, appState.funds.main + deltaBAM);
-            else if (accKey === "apt-fund") appState.funds.apt = Math.max(0, appState.funds.apt + deltaBAM);
-            else if (accKey === "card-wise") appState.funds.wise = Math.max(0, appState.funds.wise + deltaBAM);
-            else if (accKey === "cash") appState.funds.cash = Math.max(0, appState.funds.cash + deltaBAM);
-            else if (accKey === "inv") appState.funds.inv = Math.max(0, appState.funds.inv + deltaBAM);
+            const round2 = val => Math.round(val * 100) / 100;
+            if (accKey === "card-main") appState.funds.main = Math.max(0, round2(appState.funds.main + deltaBAM));
+            else if (accKey === "apt-fund") appState.funds.apt = Math.max(0, round2(appState.funds.apt + deltaBAM));
+            else if (accKey === "card-wise") appState.funds.wise = Math.max(0, round2(appState.funds.wise + deltaBAM));
+            else if (accKey === "cash") appState.funds.cash = Math.max(0, round2(appState.funds.cash + deltaBAM));
+            else if (accKey === "inv") appState.funds.inv = Math.max(0, round2(appState.funds.inv + deltaBAM));
         }
 
         function handleLogTransaction(e) {
@@ -1354,7 +1355,9 @@
                 return;
             }
 
-            const amountBAM = curr === "EUR" ? rawAmount * EUR_TO_BAM : rawAmount;
+            // Convert EUR to BAM and strictly round to 2 decimal places
+            const calculatedBAM = curr === "EUR" ? rawAmount * EUR_TO_BAM : rawAmount;
+            const amountBAM = Math.round(calculatedBAM * 100) / 100;
 
             if (type === "transfer") {
                 if (method === targetAccount) {
@@ -1368,8 +1371,8 @@
             } else {
                 adjustAccountBalance(method, -amountBAM);
                 if (category === "Parental Debt Repayment") {
-                    appState.debtLiab = Math.min(0, appState.debtLiab + amountBAM);
-                    document.getElementById("stat-debt").innerText = `${appState.debtLiab.toLocaleString('en-US', {minimumFractionDigits: 2})} BAM`;
+                    appState.debtLiab = Math.min(0, Math.round((appState.debtLiab + amountBAM) * 100) / 100);
+                    document.getElementById("stat-debt").innerText = `${appState.debtLiab.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})} BAM`;
                 }
             }
 
